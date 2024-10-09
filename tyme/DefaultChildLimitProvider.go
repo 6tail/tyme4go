@@ -4,7 +4,7 @@ import "math"
 
 // DefaultChildLimitProvider 默认的童限计算
 type DefaultChildLimitProvider struct {
-	ChildLimitProvider
+	AbstractChildLimitProvider
 }
 
 func (o DefaultChildLimitProvider) GetInfo(birthTime SolarTime, term SolarTerm) ChildLimitInfo {
@@ -25,26 +25,5 @@ func (o DefaultChildLimitProvider) GetInfo(birthTime SolarTime, term SolarTerm) 
 	// 1秒 = 2分，1秒/2=0.5秒 = 1分
 	minute := seconds * 2
 
-	birthday := birthTime.GetSolarDay()
-
-	d := birthday.GetDay() + day
-	h := birthTime.GetHour() + hour
-	mi := birthTime.GetMinute() + minute
-	h += mi / 60
-	mi %= 60
-	d += h / 24
-	h %= 24
-
-	sm, _ := SolarMonth{}.FromYm(birthday.GetYear()+year, birthday.GetMonth())
-	sm = sm.Next(month)
-
-	dc := sm.GetDayCount()
-	for d > dc {
-		d -= dc
-		sm = sm.Next(1)
-		dc = sm.GetDayCount()
-	}
-
-	t, _ := SolarTime{}.FromYmdHms(sm.GetYear(), sm.GetMonth(), d, h, mi, birthTime.GetSecond())
-	return ChildLimitInfo{}.New(birthTime, *t, year, month, day, hour, minute)
+	return o.next(birthTime, year, month, day, hour, minute, 0)
 }

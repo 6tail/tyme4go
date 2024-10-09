@@ -95,3 +95,26 @@ func TestEightChar3(t *testing.T) {
 		t.Errorf("excepted: %v, got: %v", excepted1, got1)
 	}
 }
+
+func TestEightChar4(t *testing.T) {
+	// 更改童限计算实现
+	tyme.ChildLimitProvider = tyme.LunarSect1ChildLimitProvider{}
+
+	time, _ := tyme.SolarTime{}.FromYmdHms(1994, 10, 17, 1, 0, 0)
+	childLimit := tyme.ChildLimit{}.FromSolarTime(*time, tyme.MAN)
+
+	excepted := "2002年1月27日 01:00:00"
+	got := childLimit.GetEndTime().String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+
+	excepted = "辛巳"
+	got = childLimit.GetStartDecadeFortune().GetStartLunarYear().GetSixtyCycle().GetName()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+
+	// 为了不影响其他测试用例，恢复默认的童限计算实现
+	tyme.ChildLimitProvider = tyme.DefaultChildLimitProvider{}
+}

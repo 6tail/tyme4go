@@ -5,6 +5,9 @@ import (
 	"math"
 )
 
+// EightCharProvider 八字计算接口
+var EightCharProvider IEightCharProvider = DefaultEightCharProvider{}
+
 // LunarHour 时辰
 type LunarHour struct {
 	AbstractTyme
@@ -222,12 +225,7 @@ func (o LunarHour) GetSolarTime() SolarTime {
 
 // GetEightChar 八字
 func (o LunarHour) GetEightChar() EightChar {
-	t := new(EightChar)
-	t.year = o.GetYearSixtyCycle()
-	t.month = o.GetMonthSixtyCycle()
-	t.day = o.GetDaySixtyCycle()
-	t.hour = o.GetSixtyCycle()
-	return *t
+	return EightCharProvider.GetEightChar(o)
 }
 
 // GetRecommends 宜

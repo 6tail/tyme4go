@@ -1,6 +1,7 @@
 package tyme
 
-var ChildLimitInfoProvider ChildLimitProvider = DefaultChildLimitProvider{}
+// ChildLimitProvider 童限计算接口
+var ChildLimitProvider IChildLimitProvider = DefaultChildLimitProvider{}
 
 // ChildLimit 童限
 type ChildLimit struct {
@@ -27,7 +28,7 @@ func (ChildLimit) FromSolarTime(birthTime SolarTime, gender Gender) ChildLimit {
 	if forward {
 		term = term.Next(2)
 	}
-	info := ChildLimitInfoProvider.GetInfo(birthTime, term)
+	info := ChildLimitProvider.GetInfo(birthTime, term)
 
 	return ChildLimit{
 		eightChar: eightChar,

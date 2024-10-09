@@ -4,7 +4,7 @@ import "math"
 
 // China95ChildLimitProvider 元亨利贞的童限计算
 type China95ChildLimitProvider struct {
-	ChildLimitProvider
+	AbstractChildLimitProvider
 }
 
 func (o China95ChildLimitProvider) GetInfo(birthTime SolarTime, term SolarTerm) ChildLimitInfo {
@@ -16,18 +16,5 @@ func (o China95ChildLimitProvider) GetInfo(birthTime SolarTime, term SolarTerm) 
 	minutes %= 360
 	day := minutes / 12
 
-	birthday := birthTime.GetSolarDay()
-	sm, _ := SolarMonth{}.FromYm(birthday.GetYear()+year, birthday.GetMonth())
-	sm = sm.Next(month)
-
-	d := birthday.GetDay() + day
-	dc := sm.GetDayCount()
-	for d > dc {
-		d -= dc
-		sm = sm.Next(1)
-		dc = sm.GetDayCount()
-	}
-
-	t, _ := SolarTime{}.FromYmdHms(sm.GetYear(), sm.GetMonth(), d, birthTime.GetHour(), birthTime.GetMinute(), birthTime.GetSecond())
-	return ChildLimitInfo{}.New(birthTime, *t, year, month, day, 0, 0)
+	return o.next(birthTime, year, month, day, 0, 0, 0)
 }
