@@ -1,6 +1,9 @@
 package tyme
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 // EightChar 八字
 type EightChar struct {
@@ -124,33 +127,41 @@ func (o EightChar) GetSolarTimes(startYear int, endYear int) []SolarTime {
 	y := o.year.Next(-57).GetIndex() + 1
 	// 节令偏移值
 	m *= 2
-	// 时辰地支转时刻，子时按零点算
+	// 时辰地支转时刻
 	h := o.hour.GetEarthBranch().GetIndex() * 2
+	hours := []int{h}
+	if h == 0 {
+		hours = []int{0, 23}
+	}
 	baseYear := startYear - 1
+	if baseYear > y {
+		y += 60 * int(math.Ceil(float64(baseYear-y)/60.0))
+	}
 	for y <= endYear {
-		if y >= baseYear {
-			// 立春为寅月的开始
-			term := SolarTerm{}.FromIndex(y, 3)
-			// 节令推移，年干支和月干支就都匹配上了
-			if m > 0 {
-				term = term.Next(m)
+		// 立春为寅月的开始
+		term := SolarTerm{}.FromIndex(y, 3)
+		// 节令推移，年干支和月干支就都匹配上了
+		if m > 0 {
+			term = term.Next(m)
+		}
+		solarTime := term.GetJulianDay().GetSolarTime()
+		if solarTime.GetYear() >= startYear {
+			// 日干支和节令干支的偏移值
+			solarDay := solarTime.GetSolarDay()
+			d := o.day.Next(-solarDay.GetLunarDay().GetSixtyCycle().GetIndex()).GetIndex()
+			if d > 0 {
+				// 从节令推移天数
+				solarDay = solarDay.Next(d)
 			}
-			solarTime := term.GetJulianDay().GetSolarTime()
-			if solarTime.GetYear() >= startYear {
+			for _, hour := range hours {
 				mi := 0
 				s := 0
-				// 日干支和节令干支的偏移值
-				solarDay := solarTime.GetSolarDay()
-				d := o.day.Next(-solarDay.GetLunarDay().GetSixtyCycle().GetIndex()).GetIndex()
-				if d > 0 {
-					// 从节令推移天数
-					solarDay = solarDay.Next(d)
-				} else if h == solarTime.GetHour() {
+				if d == 0 && hour == solarTime.GetHour() {
 					// 如果正好是节令当天，且小时和节令的小时数相等的极端情况，把分钟和秒钟带上
 					mi = solarTime.GetMinute()
 					s = solarTime.GetSecond()
 				}
-				time, _ := SolarTime{}.FromYmdHms(solarDay.GetYear(), solarDay.GetMonth(), solarDay.GetDay(), h, mi, s)
+				time, _ := SolarTime{}.FromYmdHms(solarDay.GetYear(), solarDay.GetMonth(), solarDay.GetDay(), hour, mi, s)
 				// 验证一下
 				if time.GetLunarHour().GetEightChar().Equals(o) {
 					l = append(l, *time)

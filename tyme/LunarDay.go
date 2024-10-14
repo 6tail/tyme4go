@@ -275,3 +275,8 @@ func (o LunarDay) GetRecommends() ([]Taboo, error) {
 func (o LunarDay) GetAvoids() ([]Taboo, error) {
 	return Taboo{}.GetDayAvoids(o.GetMonthSixtyCycle(), o.GetSixtyCycle())
 }
+
+// GetMinorRen 小六壬
+func (o LunarDay) GetMinorRen() MinorRen {
+	return o.GetLunarMonth().GetMinorRen().Next(o.day - 1)
+}

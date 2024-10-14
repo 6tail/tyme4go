@@ -295,3 +295,8 @@ func (o LunarMonth) GetJupiterDirection() Direction {
 func (o LunarMonth) GetFetus() FetusMonth {
 	return *FetusMonth{}.FromLunarMonth(o)
 }
+
+// GetMinorRen 小六壬
+func (o LunarMonth) GetMinorRen() MinorRen {
+	return MinorRen{}.FromIndex((o.month - 1) % 6)
+}

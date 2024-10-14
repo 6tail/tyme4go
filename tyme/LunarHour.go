@@ -237,3 +237,8 @@ func (o LunarHour) GetRecommends() ([]Taboo, error) {
 func (o LunarHour) GetAvoids() ([]Taboo, error) {
 	return Taboo{}.GetHourRecommends(o.GetDaySixtyCycle(), o.GetSixtyCycle())
 }
+
+// GetMinorRen 小六壬
+func (o LunarHour) GetMinorRen() MinorRen {
+	return o.GetLunarDay().GetMinorRen().Next(o.GetIndexInDay())
+}

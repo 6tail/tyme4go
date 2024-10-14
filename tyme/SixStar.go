@@ -3,7 +3,7 @@ package tyme
 // SixStarNames 六曜名称
 var SixStarNames = []string{"先胜", "友引", "先负", "佛灭", "大安", "赤口"}
 
-// SixStar 六曜（孔明六曜星、小六壬）
+// SixStar 六曜（孔明六曜星）
 type SixStar struct {
 	LoopTyme
 }
