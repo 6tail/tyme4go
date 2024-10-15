@@ -112,9 +112,9 @@ func (o LunarWeek) Next(n int) LunarWeek {
 func (o LunarWeek) GetDays() []LunarDay {
 	var l []LunarDay
 	d := o.GetFirstDay()
-	l[0] = d
+	l = append(l, d)
 	for i := 1; i < 7; i++ {
-		l[i] = d.Next(i)
+		l = append(l, d.Next(i))
 	}
 	return l
 }

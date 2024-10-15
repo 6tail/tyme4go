@@ -74,7 +74,7 @@ func (o SolarSeason) GetMonths() []SolarMonth {
 	y := o.GetYear()
 	for i := 1; i < 4; i++ {
 		m, _ := SolarMonth{}.FromYm(y, o.index*3+i)
-		l[i-1] = m
+		l = append(l, m)
 	}
 	return l
 }

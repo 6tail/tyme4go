@@ -52,7 +52,7 @@ func (o SixtyCycle) GetTen() Ten {
 // GetExtraEarthBranches 旬空(空亡)，因地支比天干多2个，旬空则为每一轮干支一一配对后多出来的2个地支
 func (o SixtyCycle) GetExtraEarthBranches() []EarthBranch {
 	var l []EarthBranch
-	l[0] = EarthBranch{}.FromIndex(10 + o.GetEarthBranch().GetIndex() - o.GetHeavenStem().GetIndex())
-	l[1] = l[0].Next(1)
+	l = append(l, EarthBranch{}.FromIndex(10+o.GetEarthBranch().GetIndex()-o.GetHeavenStem().GetIndex()))
+	l = append(l, l[0].Next(1))
 	return l
 }

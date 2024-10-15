@@ -125,9 +125,9 @@ func (o SolarWeek) Next(n int) SolarWeek {
 func (o SolarWeek) GetDays() []SolarDay {
 	var l []SolarDay
 	d := o.GetFirstDay()
-	l[0] = d
+	l = append(l, d)
 	for i := 1; i < 7; i++ {
-		l[i] = d.Next(i)
+		l = append(l, d.Next(i))
 	}
 	return l
 }
