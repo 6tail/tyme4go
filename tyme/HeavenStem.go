@@ -3,7 +3,7 @@ package tyme
 // HeavenStemNames 天干名称
 var HeavenStemNames = []string{"甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"}
 
-// HeavenStem 天干
+// HeavenStem 天干（天元）
 type HeavenStem struct {
 	LoopTyme
 }

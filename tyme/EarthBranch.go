@@ -3,7 +3,7 @@ package tyme
 // EarthBranchNames 地支名称
 var EarthBranchNames = []string{"子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"}
 
-// EarthBranch 地支
+// EarthBranch 地支（地元）
 type EarthBranch struct {
 	LoopTyme
 }
@@ -60,6 +60,30 @@ func (o EarthBranch) GetHideHeavenStemResidual() *HeavenStem {
 	}
 	t := HeavenStem{}.FromIndex(n)
 	return &t
+}
+
+// GetHideHeavenStems 藏干列表
+func (o EarthBranch) GetHideHeavenStems() []HideHeavenStem {
+	var l []HideHeavenStem
+	l = append(l, HideHeavenStem{
+		heavenStem:         o.GetHideHeavenStemMain(),
+		hideHeavenStemType: MAIN,
+	})
+	h := o.GetHideHeavenStemMiddle()
+	if nil != h {
+		l = append(l, HideHeavenStem{
+			heavenStem:         *h,
+			hideHeavenStemType: MIDDLE,
+		})
+	}
+	h = o.GetHideHeavenStemResidual()
+	if nil != h {
+		l = append(l, HideHeavenStem{
+			heavenStem:         *h,
+			hideHeavenStemType: RESIDUAL,
+		})
+	}
+	return l
 }
 
 // GetZodiac 生肖

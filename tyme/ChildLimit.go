@@ -97,3 +97,18 @@ func (o ChildLimit) GetStartDecadeFortune() DecadeFortune {
 func (o ChildLimit) GetStartFortune() Fortune {
 	return Fortune{}.FromChildLimit(o, 0)
 }
+
+// GetEndLunarYear 结束农历年
+func (o ChildLimit) GetEndLunarYear() LunarYear {
+	endTime := o.GetEndTime()
+	solarYear := endTime.GetYear()
+	y := endTime.GetLunarHour().GetLunarDay().GetLunarMonth().GetLunarYear()
+	if y.GetYear() < solarYear {
+		// 正月初一在立春之后的，农历年往后推一年
+		lunarHour, _ := LunarHour{}.FromYmdHms(solarYear, 1, 1, 0, 0, 0)
+		if lunarHour.GetSolarTime().IsAfter(SolarTerm{}.FromIndex(solarYear, 3).GetJulianDay().GetSolarTime()) {
+			y = y.Next(1)
+		}
+	}
+	return y
+}

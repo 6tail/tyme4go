@@ -18,7 +18,7 @@ func (DecadeFortune) FromChildLimit(childLimit ChildLimit, index int) DecadeFort
 
 // GetStartAge 开始年龄
 func (o DecadeFortune) GetStartAge() int {
-	return o.childLimit.GetYearCount() + 1 + o.index*10
+	return o.childLimit.GetEndTime().GetYear() - o.childLimit.GetStartTime().GetYear() + 1 + o.index*10
 }
 
 // GetEndAge 结束年龄
@@ -28,7 +28,7 @@ func (o DecadeFortune) GetEndAge() int {
 
 // GetStartLunarYear 开始农历年
 func (o DecadeFortune) GetStartLunarYear() LunarYear {
-	return o.childLimit.GetEndTime().GetLunarHour().GetLunarDay().GetLunarMonth().GetLunarYear().Next(o.index * 10)
+	return o.childLimit.GetEndLunarYear().Next(o.index * 10)
 }
 
 // GetEndLunarYear 结束农历年

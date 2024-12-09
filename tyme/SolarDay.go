@@ -3,6 +3,7 @@ package tyme
 import (
 	"fmt"
 	"math"
+	"strconv"
 )
 
 var SolarDayNames = []string{"1日", "2日", "3日", "4日", "5日", "6日", "7日", "8日", "9日", "10日", "11日", "12日", "13日", "14日", "15日", "16日", "17日", "18日", "19日", "20日", "21日", "22日", "23日", "24日", "25日", "26日", "27日", "28日", "29日", "30日", "31日"}
@@ -239,6 +240,44 @@ func (o SolarDay) GetNineDay() *NineDay {
 	days := o.Subtract(start)
 	d := NineDay{}.New(Nine{}.FromIndex(days/9), days%9)
 	return &d
+}
+
+// GetHideHeavenStemDay 人元司令分野
+func (o SolarDay) GetHideHeavenStemDay() HideHeavenStemDay {
+	dayCounts := []int{3, 5, 7, 9, 10, 30}
+	term := o.GetTerm()
+	if term.IsQi() {
+		term = term.Next(-1)
+	}
+	dayIndex := o.Subtract(term.GetJulianDay().GetSolarDay())
+	startIndex := (term.GetIndex() - 1) * 3
+	data := "93705542220504xx1513904541632524533533105544806564xx7573304542018584xx95"[startIndex : startIndex+6]
+	days := 0
+	heavenStemIndex := 0
+	typeIndex := 0
+	for typeIndex < 3 {
+		i := typeIndex * 2
+		d := data[i : i+1]
+		count := 0
+		if d != "x" {
+			heavenStemIndex, _ = strconv.Atoi(d)
+			dayCountIndex, _ := strconv.Atoi(data[i+1 : i+2])
+			count = dayCounts[dayCountIndex]
+			days += count
+		}
+		if dayIndex <= days {
+			dayIndex -= days - count
+			break
+		}
+		typeIndex++
+	}
+	hideHeavenStemType := RESIDUAL
+	if typeIndex == 1 {
+		hideHeavenStemType = MIDDLE
+	} else if typeIndex == 2 {
+		hideHeavenStemType = MAIN
+	}
+	return HideHeavenStemDay{}.New(HideHeavenStem{}.FromIndex(heavenStemIndex, hideHeavenStemType), dayIndex)
 }
 
 // GetPlumRainDay 梅雨天（芒种后的第1个丙日入梅，小暑后的第1个未日出梅）
