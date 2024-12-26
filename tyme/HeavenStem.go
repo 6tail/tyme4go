@@ -86,7 +86,7 @@ func (o HeavenStem) GetPengZuHeavenStem() PengZuHeavenStem {
 func (o HeavenStem) GetTerrain(earthBranch EarthBranch) Terrain {
 	earthBranchIndex := earthBranch.GetIndex()
 	offset := earthBranchIndex
-	if YANG == o.GetYinYang() {
+	if YIN == o.GetYinYang() {
 		offset = -offset
 	}
 	return Terrain{}.FromIndex([]int{1, 6, 10, 9, 10, 9, 7, 0, 4, 3}[o.index] + offset)

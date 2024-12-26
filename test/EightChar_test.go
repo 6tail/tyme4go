@@ -118,3 +118,13 @@ func TestEightChar4(t *testing.T) {
 	// 为了不影响其他测试用例，恢复默认的童限计算实现
 	tyme.ChildLimitProvider = tyme.DefaultChildLimitProvider{}
 }
+
+func TestEightChar5(t *testing.T) {
+	me, _ := tyme.HeavenStem{}.FromName("丙")
+	earthBranch, _ := tyme.EarthBranch{}.FromName("寅")
+	excepted := "长生"
+	got := me.GetTerrain(*earthBranch).GetName()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+}
