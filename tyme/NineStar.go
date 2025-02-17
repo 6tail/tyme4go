@@ -28,7 +28,7 @@ func (o NineStar) Next(n int) NineStar {
 
 // GetColor 颜色
 func (o NineStar) GetColor() string {
-	return []string{"白", "黒", "碧", "绿", "黄", "白", "赤", "白", "紫"}[o.index]
+	return []string{"白", "黑", "碧", "绿", "黄", "白", "赤", "白", "紫"}[o.index]
 }
 
 // GetElement 五行

@@ -181,16 +181,12 @@ func (o SolarDay) GetPhenologyDay() PhenologyDay {
 
 // GetDogDay 三伏天
 func (o SolarDay) GetDogDay() *DogDay {
+	// 夏至
 	xiaZhi := SolarTerm{}.FromIndex(o.GetYear(), 12)
 	// 第1个庚日
 	start := xiaZhi.GetJulianDay().GetSolarDay()
-	add := 6 - start.GetLunarDay().GetSixtyCycle().GetHeavenStem().GetIndex()
-	if add < 0 {
-		add += 10
-	}
 	// 第3个庚日，即初伏第1天
-	add += 20
-	start = start.Next(add)
+	start = start.Next(start.GetLunarDay().GetSixtyCycle().GetHeavenStem().StepsTo(6) + 20)
 	days := o.Subtract(start)
 	// 初伏以前
 	if days < 0 {
@@ -285,22 +281,14 @@ func (o SolarDay) GetPlumRainDay() *PlumRainDay {
 	// 芒种
 	grainInEar := SolarTerm{}.FromIndex(o.GetYear(), 11)
 	start := grainInEar.GetJulianDay().GetSolarDay()
-	add := 2 - start.GetLunarDay().GetSixtyCycle().GetHeavenStem().GetIndex()
-	if add < 0 {
-		add += 10
-	}
 	// 芒种后的第1个丙日
-	start = start.Next(add)
+	start = start.Next(start.GetLunarDay().GetSixtyCycle().GetHeavenStem().StepsTo(2))
 
 	// 小暑
 	slightHeat := grainInEar.Next(2)
 	end := slightHeat.GetJulianDay().GetSolarDay()
-	add = 7 - end.GetLunarDay().GetSixtyCycle().GetEarthBranch().GetIndex()
-	if add < 0 {
-		add += 12
-	}
 	// 小暑后的第1个未日
-	end = end.Next(add)
+	end = end.Next(end.GetLunarDay().GetSixtyCycle().GetEarthBranch().StepsTo(7))
 
 	if o.IsBefore(start) || o.IsAfter(end) {
 		return nil

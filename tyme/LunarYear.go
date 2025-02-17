@@ -135,3 +135,8 @@ func (o LunarYear) GetMonths() []LunarMonth {
 	}
 	return l
 }
+
+// GetKitchenGodSteed 灶马头
+func (o LunarYear) GetKitchenGodSteed() KitchenGodSteed {
+	return KitchenGodSteed{}.FromLunarYear(o.year)
+}

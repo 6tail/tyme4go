@@ -278,7 +278,11 @@ func (o LunarMonth) GetSixtyCycle() SixtyCycle {
 
 // GetNineStar 九星
 func (o LunarMonth) GetNineStar() NineStar {
-	return NineStar{}.FromIndex(27 - o.year.GetSixtyCycle().GetEarthBranch().GetIndex()%3*3 - o.GetSixtyCycle().GetEarthBranch().GetIndex())
+	index := o.GetSixtyCycle().GetEarthBranch().GetIndex()
+	if index < 2 {
+		index += 3
+	}
+	return NineStar{}.FromIndex(27 - o.year.GetSixtyCycle().GetEarthBranch().GetIndex()%3*3 - index)
 }
 
 // GetJupiterDirection 太岁方位

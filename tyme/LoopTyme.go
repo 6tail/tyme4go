@@ -38,6 +38,10 @@ func (o LoopTyme) nextIndex(n int) int {
 	return o.indexOf(o.index + n)
 }
 
+func (o LoopTyme) StepsTo(targetIndex int) int {
+	return o.indexOf(targetIndex - o.index)
+}
+
 func (LoopTyme) FromIndex(names []string, index int) LoopTyme {
 	instance := LoopTyme{names: names}
 	instance.index = instance.nextIndex(index)
