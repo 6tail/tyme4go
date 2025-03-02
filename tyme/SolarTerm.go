@@ -9,17 +9,18 @@ var SolarTermNames = []string{"冬至", "小寒", "大寒", "立春", "雨水", 
 // SolarTerm 节气
 type SolarTerm struct {
 	LoopTyme
+	// 年
+	year int
 	// 粗略的儒略日
 	cursoryJulianDay float64
 }
 
-func (SolarTerm) new(cursoryJulianDay float64, index int) SolarTerm {
-	return SolarTerm{LoopTyme{}.FromIndex(SolarTermNames, index), cursoryJulianDay}
-}
-
 func (SolarTerm) FromIndex(year int, index int) SolarTerm {
-	o := SolarTerm{LoopTyme{}.FromIndex(SolarTermNames, index), 0}
-	o.cursoryJulianDay = o.initByYear(year, index)
+	parent := LoopTyme{}.FromIndex(SolarTermNames, index)
+	size := parent.GetSize()
+	y := (year*size + index) / size
+	o := SolarTerm{parent, y, 0}
+	o.cursoryJulianDay = o.initByYear(y, parent.GetIndex())
 	return o
 }
 
@@ -28,7 +29,7 @@ func (SolarTerm) FromName(year int, name string) (*SolarTerm, error) {
 	if err != nil {
 		return nil, err
 	}
-	o := SolarTerm{*p, 0}
+	o := SolarTerm{*p, year, 0}
 	o.cursoryJulianDay = o.initByYear(year, o.index)
 	return &o, nil
 }
@@ -52,7 +53,9 @@ func (o SolarTerm) String() string {
 }
 
 func (o SolarTerm) Next(n int) SolarTerm {
-	return SolarTerm{}.new(o.cursoryJulianDay+15.2184*float64(n), o.nextIndex(n))
+	size := o.GetSize()
+	i := o.index + n
+	return SolarTerm{}.FromIndex((o.year*size+i)/size, o.indexOf(i))
 }
 
 // IsJie 是否节令
@@ -68,6 +71,11 @@ func (o SolarTerm) IsQi() bool {
 // GetJulianDay 儒略日
 func (o SolarTerm) GetJulianDay() JulianDay {
 	return JulianDay{}.FromJulianDay(QiAccurate2(o.cursoryJulianDay) + J2000)
+}
+
+// GetYear 年
+func (o SolarTerm) GetYear() int {
+	return o.year
 }
 
 // GetCursoryJulianDay 粗略的儒略日

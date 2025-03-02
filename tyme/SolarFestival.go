@@ -132,17 +132,9 @@ func (o SolarFestival) GetStartYear() int {
 }
 
 func (o SolarFestival) Next(n int) *SolarFestival {
-	if n == 0 {
-		f, _ := SolarFestival{}.FromYmd(o.day.GetYear(), o.day.GetMonth(), o.day.GetDay())
-		return f
-	}
 	size := len(SolarFestivalNames)
-	t := o.index + n
-	offset := o.IndexOf(t, size)
-	if t < 0 {
-		t -= size
-	}
-	f, _ := SolarFestival{}.FromIndex(o.day.GetYear()+t/size, offset)
+	i := o.index + n
+	f, _ := SolarFestival{}.FromIndex((o.day.GetYear()*size+i)/size, o.IndexOf(i, size))
 	return f
 }
 

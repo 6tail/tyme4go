@@ -53,19 +53,9 @@ func (o SolarHalfYear) String() string {
 }
 
 func (o SolarHalfYear) Next(n int) SolarHalfYear {
-	i := o.index
-	y := o.GetYear()
-	if n != 0 {
-		i += n
-		y += i / 2
-		i %= 2
-		if i < 0 {
-			i += 2
-			y -= 1
-		}
-	}
-	obj, _ := SolarHalfYear{}.FromIndex(y, i)
-	return obj
+	i := o.index + n
+	y, _ := SolarHalfYear{}.FromIndex((o.GetYear()*2+i)/2, o.IndexOf(i, 2))
+	return y
 }
 
 // GetMonths 月份列表，半年有6个月。

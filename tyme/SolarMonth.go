@@ -79,17 +79,7 @@ func (o SolarMonth) String() string {
 }
 
 func (o SolarMonth) Next(n int) SolarMonth {
-	m := o.month
-	y := o.GetYear()
-	if n != 0 {
-		m += n
-		y += m / 12
-		m %= 12
-		if m < 1 {
-			m += 12
-			y--
-		}
-	}
-	obj, _ := SolarMonth{}.FromYm(y, m)
-	return obj
+	i := o.month - 1 + n
+	m, _ := SolarMonth{}.FromYm((o.GetYear()*12+i)/12, o.IndexOf(i, 12)+1)
+	return m
 }

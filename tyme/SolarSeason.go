@@ -53,19 +53,9 @@ func (o SolarSeason) String() string {
 }
 
 func (o SolarSeason) Next(n int) SolarSeason {
-	i := o.index
-	y := o.GetYear()
-	if n != 0 {
-		i += n
-		y += i / 4
-		i %= 4
-		if i < 0 {
-			i += 4
-			y -= 1
-		}
-	}
-	obj, _ := SolarSeason{}.FromIndex(y, i)
-	return obj
+	i := o.index + n
+	s, _ := SolarSeason{}.FromIndex((o.GetYear()*4+i)/4, o.IndexOf(i, 4))
+	return s
 }
 
 // GetMonths 月份列表，1季度有3个月。

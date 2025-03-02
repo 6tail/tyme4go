@@ -178,17 +178,9 @@ func (o LunarFestival) GetSolarTerm() *SolarTerm {
 }
 
 func (o LunarFestival) Next(n int) *LunarFestival {
-	if n == 0 {
-		f, _ := LunarFestival{}.FromYmd(o.day.GetYear(), o.day.GetMonth(), o.day.GetDay())
-		return f
-	}
 	size := len(LunarFestivalNames)
-	t := o.index + n
-	offset := o.IndexOf(t, size)
-	if t < 0 {
-		t -= size
-	}
-	f, _ := LunarFestival{}.FromIndex(o.day.GetYear()+t/size, offset)
+	i := o.index + n
+	f, _ := LunarFestival{}.FromIndex((o.day.GetYear()*size+i)/size, o.IndexOf(i, size))
 	return f
 }
 
