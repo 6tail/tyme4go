@@ -17,16 +17,16 @@ type SolarMonth struct {
 	month int
 }
 
-func (SolarMonth) FromYm(year int, month int) (SolarMonth, error) {
+func (SolarMonth) FromYm(year int, month int) (*SolarMonth, error) {
 	if month < 1 || month > 12 {
-		return SolarMonth{}, fmt.Errorf(fmt.Sprintf("illegal solar month: %d", month))
+		return nil, fmt.Errorf(fmt.Sprintf("illegal solar month: %d", month))
 	}
 	y, err := SolarYear{}.FromYear(year)
 	if err != nil {
-		return SolarMonth{}, err
+		return nil, err
 	}
-	return SolarMonth{
-		year:  y,
+	return &SolarMonth{
+		year:  *y,
 		month: month,
 	}, nil
 }
@@ -81,5 +81,29 @@ func (o SolarMonth) String() string {
 func (o SolarMonth) Next(n int) SolarMonth {
 	i := o.month - 1 + n
 	m, _ := SolarMonth{}.FromYm((o.GetYear()*12+i)/12, o.IndexOf(i, 12)+1)
-	return m
+	return *m
+}
+
+// GetWeeks 本月公历周列表
+func (o SolarMonth) GetWeeks(start int) []SolarWeek {
+	var l []SolarWeek
+	size := o.GetWeekCount(start)
+	y := o.GetYear()
+	for i := 0; i < size; i++ {
+		w, _ := SolarWeek{}.FromYm(y, o.month, i, start)
+		l = append(l, *w)
+	}
+	return l
+}
+
+// GetDays 本月公历日列表
+func (o SolarMonth) GetDays() []SolarDay {
+	var l []SolarDay
+	size := o.GetDayCount()
+	y := o.GetYear()
+	for i := 1; i <= size; i++ {
+		d, _ := SolarDay{}.FromYmd(y, o.month, i)
+		l = append(l, *d)
+	}
+	return l
 }

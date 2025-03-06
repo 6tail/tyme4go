@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// TestSolarTerm0 公历半年测试
+// TestSolarTerm0 节气测试
 func TestSolarTerm0(t *testing.T) {
 	d, _ := tyme.SolarTerm{}.FromName(2023, "冬至")
 	excepted := "冬至"
@@ -16,6 +16,24 @@ func TestSolarTerm0(t *testing.T) {
 
 	excepted = "2022年12月22日"
 	got = d.GetJulianDay().GetSolarDay().String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+}
+
+func TestSolarTerm1(t *testing.T) {
+	d, _ := tyme.SolarTerm{}.FromName(2023, "冬至")
+	excepted := "2022年12月22日 05:48:01"
+	got := d.GetJulianDay().GetSolarTime().String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+}
+
+func TestSolarTerm2(t *testing.T) {
+	d, _ := tyme.SolarTerm{}.FromName(2025, "惊蛰")
+	excepted := "2025年3月5日 16:07:02"
+	got := d.GetJulianDay().GetSolarTime().String()
 	if excepted != got {
 		t.Errorf("excepted: %v, got: %v", excepted, got)
 	}

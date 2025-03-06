@@ -17,23 +17,23 @@ type SolarDay struct {
 	day int
 }
 
-func (SolarDay) FromYmd(year int, month int, day int) (SolarDay, error) {
+func (SolarDay) FromYmd(year int, month int, day int) (*SolarDay, error) {
 	if day < 1 {
-		return SolarDay{}, fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
+		return nil, fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
 	}
 	m, err := SolarMonth{}.FromYm(year, month)
 	if err != nil {
-		return SolarDay{}, err
+		return nil, err
 	}
 	if 1582 == year && 10 == month {
 		if (day > 4 && day < 15) || day > 31 {
-			return SolarDay{}, fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
+			return nil, fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
 		}
 	} else if day > m.GetDayCount() {
-		return SolarDay{}, fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
+		return nil, fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
 	}
-	return SolarDay{
-		month: m,
+	return &SolarDay{
+		month: *m,
 		day:   day,
 	}, nil
 }
@@ -163,7 +163,7 @@ func (o SolarDay) GetSolarWeek(start int) SolarWeek {
 	y := o.GetYear()
 	m := o.GetMonth()
 	d, _ := SolarDay{}.FromYmd(y, m, 1)
-	w, _ := SolarWeek{}.FromYm(y, m, int(math.Ceil(float64((o.day+d.GetWeek().Next(-start).GetIndex())/7))-1), start)
+	w, _ := SolarWeek{}.FromYm(y, m, int(math.Ceil(float64(o.day+d.GetWeek().Next(-start).GetIndex())/7))-1, start)
 	return *w
 }
 
@@ -304,7 +304,7 @@ func (o SolarDay) GetPlumRainDay() *PlumRainDay {
 // GetIndexInYear 位于当年的索引
 func (o SolarDay) GetIndexInYear() int {
 	d, _ := SolarDay{}.FromYmd(o.GetYear(), 1, 1)
-	return o.Subtract(d)
+	return o.Subtract(*d)
 }
 
 // Subtract 公历日期相减，获得相差天数

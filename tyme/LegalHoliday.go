@@ -36,7 +36,7 @@ func (LegalHoliday) New(year int, month int, day int, data string) (*LegalHolida
 	}
 
 	return &LegalHoliday{
-		day:  d,
+		day:  *d,
 		name: LegalHolidayNames[index],
 		work: '0' == []rune(data[8:9])[0],
 	}, nil

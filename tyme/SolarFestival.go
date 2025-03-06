@@ -73,7 +73,7 @@ func (SolarFestival) FromIndex(year int, index int) (*SolarFestival, error) {
 		return nil, err
 	}
 	d, _ := SolarDay{}.FromYmd(year, month, day)
-	f, err := SolarFestival{}.New(t, d, startYear, data)
+	f, err := SolarFestival{}.New(t, *d, startYear, data)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (SolarFestival) FromYmd(year int, month int, day int) (*SolarFestival, erro
 	if err != nil {
 		return nil, err
 	}
-	f, err := SolarFestival{}.New(DAY, d, startYear, data)
+	f, err := SolarFestival{}.New(DAY, *d, startYear, data)
 	if err != nil {
 		return nil, err
 	}

@@ -15,16 +15,16 @@ type SolarSeason struct {
 	index int
 }
 
-func (SolarSeason) FromIndex(year int, index int) (SolarSeason, error) {
+func (SolarSeason) FromIndex(year int, index int) (*SolarSeason, error) {
 	if index < 0 || index > 3 {
-		return SolarSeason{}, fmt.Errorf(fmt.Sprintf("illegal solar season index: %d", index))
+		return nil, fmt.Errorf(fmt.Sprintf("illegal solar season index: %d", index))
 	}
 	y, err := SolarYear{}.FromYear(year)
 	if err != nil {
-		return SolarSeason{}, err
+		return nil, err
 	}
-	return SolarSeason{
-		year:  y,
+	return &SolarSeason{
+		year:  *y,
 		index: index,
 	}, nil
 }
@@ -55,7 +55,7 @@ func (o SolarSeason) String() string {
 func (o SolarSeason) Next(n int) SolarSeason {
 	i := o.index + n
 	s, _ := SolarSeason{}.FromIndex((o.GetYear()*4+i)/4, o.IndexOf(i, 4))
-	return s
+	return *s
 }
 
 // GetMonths 月份列表，1季度有3个月。
@@ -64,7 +64,7 @@ func (o SolarSeason) GetMonths() []SolarMonth {
 	y := o.GetYear()
 	for i := 1; i < 4; i++ {
 		m, _ := SolarMonth{}.FromYm(y, o.index*3+i)
-		l = append(l, m)
+		l = append(l, *m)
 	}
 	return l
 }

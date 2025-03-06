@@ -32,7 +32,7 @@ func (SolarTime) FromYmdHms(year int, month int, day int, hour int, minute int, 
 		return nil, err
 	}
 	return &SolarTime{
-		day:    d,
+		day:    *d,
 		hour:   hour,
 		minute: minute,
 		second: second,

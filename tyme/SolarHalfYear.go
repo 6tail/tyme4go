@@ -15,16 +15,16 @@ type SolarHalfYear struct {
 	index int
 }
 
-func (SolarHalfYear) FromIndex(year int, index int) (SolarHalfYear, error) {
+func (SolarHalfYear) FromIndex(year int, index int) (*SolarHalfYear, error) {
 	if index < 0 || index > 1 {
-		return SolarHalfYear{}, fmt.Errorf(fmt.Sprintf("illegal solar half year index: %d", index))
+		return nil, fmt.Errorf(fmt.Sprintf("illegal solar half year index: %d", index))
 	}
 	y, err := SolarYear{}.FromYear(year)
 	if err != nil {
-		return SolarHalfYear{}, err
+		return nil, err
 	}
-	return SolarHalfYear{
-		year:  y,
+	return &SolarHalfYear{
+		year:  *y,
 		index: index,
 	}, nil
 }
@@ -55,7 +55,7 @@ func (o SolarHalfYear) String() string {
 func (o SolarHalfYear) Next(n int) SolarHalfYear {
 	i := o.index + n
 	y, _ := SolarHalfYear{}.FromIndex((o.GetYear()*2+i)/2, o.IndexOf(i, 2))
-	return y
+	return *y
 }
 
 // GetMonths 月份列表，半年有6个月。
@@ -64,7 +64,7 @@ func (o SolarHalfYear) GetMonths() []SolarMonth {
 	y := o.GetYear()
 	for i := 1; i < 7; i++ {
 		m, _ := SolarMonth{}.FromYm(y, o.index*6+i)
-		l = append(l, m)
+		l = append(l, *m)
 	}
 	return l
 }
@@ -75,7 +75,7 @@ func (o SolarHalfYear) GetSeasons() []SolarSeason {
 	y := o.GetYear()
 	for i := 0; i < 2; i++ {
 		m, _ := SolarSeason{}.FromIndex(y, o.index*2+i)
-		l = append(l, m)
+		l = append(l, *m)
 	}
 	return l
 }

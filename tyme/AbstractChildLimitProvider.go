@@ -17,8 +17,8 @@ func (o AbstractChildLimitProvider) next(birthTime SolarTime, addYear int, addMo
 	d += h / 24
 	h %= 24
 
-	sm, _ := SolarMonth{}.FromYm(birthTime.GetYear()+addYear, birthTime.GetMonth())
-	sm = sm.Next(addMonth)
+	mt, _ := SolarMonth{}.FromYm(birthTime.GetYear()+addYear, birthTime.GetMonth())
+	sm := mt.Next(addMonth)
 
 	dc := sm.GetDayCount()
 	for d > dc {

@@ -32,7 +32,7 @@ func (SolarWeek) FromYm(year int, month int, index int, start int) (*SolarWeek, 
 		return nil, fmt.Errorf(fmt.Sprintf("illegal solar week index: %d in month: %v", index, m))
 	}
 	return &SolarWeek{
-		month: m,
+		month: *m,
 		index: index,
 		start: Week{}.FromIndex(start),
 	}, nil
@@ -117,8 +117,8 @@ func (o SolarWeek) Next(n int) SolarWeek {
 			d += m.GetWeekCount(startIndex)
 		}
 	}
-	t, _ := SolarWeek{}.FromYm(m.GetYear(), m.GetMonth(), d, startIndex)
-	return *t
+	w, _ := SolarWeek{}.FromYm(m.GetYear(), m.GetMonth(), d, startIndex)
+	return *w
 }
 
 // GetDays 本周公历日列表

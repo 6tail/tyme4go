@@ -29,3 +29,20 @@ func TestWeek1(t *testing.T) {
 		t.Errorf("excepted: %v, got: %v", excepted, got)
 	}
 }
+
+func TestWeek2(t *testing.T) {
+	solarDay, _ := tyme.SolarDay{}.FromYmd(2025, 3, 6)
+	solarWeek := solarDay.GetSolarWeek(0)
+
+	excepted := "2025年3月第二周"
+	got := solarWeek.String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+
+	excepted = "2025年3月2日"
+	got = solarWeek.GetFirstDay().String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+}
