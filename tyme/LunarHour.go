@@ -235,7 +235,7 @@ func (o LunarHour) GetRecommends() ([]Taboo, error) {
 
 // GetAvoids 忌
 func (o LunarHour) GetAvoids() ([]Taboo, error) {
-	return Taboo{}.GetHourRecommends(o.GetDaySixtyCycle(), o.GetSixtyCycle())
+	return Taboo{}.GetHourAvoids(o.GetDaySixtyCycle(), o.GetSixtyCycle())
 }
 
 // GetMinorRen 小六壬
