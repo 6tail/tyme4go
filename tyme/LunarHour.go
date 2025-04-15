@@ -2,13 +2,12 @@ package tyme
 
 import (
 	"fmt"
-	"math"
 )
 
 // EightCharProvider 八字计算接口
 var EightCharProvider IEightCharProvider = DefaultEightCharProvider{}
 
-// LunarHour 时辰
+// LunarHour 农历时辰
 type LunarHour struct {
 	AbstractTyme
 	// 农历日
@@ -19,6 +18,10 @@ type LunarHour struct {
 	minute int
 	// 秒
 	second int
+	// 公历时刻（第一次使用时才会初始化）
+	solarTime *SolarTime
+	// 干支时辰（第一次使用时才会初始化）
+	sixtyCycleHour *SixtyCycleHour
 }
 
 func (LunarHour) FromYmdHms(year int, month int, day int, hour int, minute int, second int) (*LunarHour, error) {
@@ -144,59 +147,36 @@ func (o LunarHour) IsAfter(target LunarHour) bool {
 	return o.second > target.GetSecond()
 }
 
-// GetYearSixtyCycle 当时的年干支（立春换）
+// Deprecated: Use GetSixtyCycleHour.GetYear instead.
 func (o LunarHour) GetYearSixtyCycle() SixtyCycle {
-	solarTime := o.GetSolarTime()
-	solarYear := o.day.GetSolarDay().GetYear()
-	springSolarTime := SolarTerm{}.FromIndex(solarYear, 3).GetJulianDay().GetSolarTime()
-	lunarYear := o.day.GetLunarMonth().GetLunarYear()
-	year := lunarYear.GetYear()
-	sixtyCycle := lunarYear.GetSixtyCycle()
-	if year == solarYear {
-		if solarTime.IsBefore(springSolarTime) {
-			sixtyCycle = sixtyCycle.Next(-1)
-		}
-	} else if year < solarYear {
-		if !solarTime.IsBefore(springSolarTime) {
-			sixtyCycle = sixtyCycle.Next(1)
-		}
-	}
-	return sixtyCycle
+	return o.GetSixtyCycleHour().GetYear()
 }
 
-// GetMonthSixtyCycle 当时的月干支（节气换）
+// Deprecated: Use GetSixtyCycleHour.GetMonth instead.
 func (o LunarHour) GetMonthSixtyCycle() SixtyCycle {
-	solarTime := o.GetSolarTime()
-	year := solarTime.GetYear()
-	term := solarTime.GetTerm()
-	index := term.GetIndex() - 3
-	if index < 0 && term.GetJulianDay().GetSolarTime().IsAfter(SolarTerm{}.FromIndex(year, 3).GetJulianDay().GetSolarTime()) {
-		index += 24
-	}
-	m, _ := LunarMonth{}.FromYm(year, 1)
-	return m.GetSixtyCycle().Next(int(math.Floor(float64(index) / 2)))
+	return o.GetSixtyCycleHour().GetMonth()
 }
 
-// GetDaySixtyCycle 当时的日干支（23:00开始算做第二天）
+// Deprecated: Use GetSixtyCycleHour.GetDay instead.
 func (o LunarHour) GetDaySixtyCycle() SixtyCycle {
-	d := o.day.GetSixtyCycle()
-	if o.hour < 23 {
-		return d
-	}
-	return d.Next(1)
+	return o.GetSixtyCycleHour().GetDay()
 }
 
 // GetSixtyCycle 干支
 func (o LunarHour) GetSixtyCycle() SixtyCycle {
 	earthBranchIndex := o.GetIndexInDay() % 12
-	heavenStemIndex := o.GetDaySixtyCycle().GetHeavenStem().GetIndex()%5*2 + earthBranchIndex
+	d := o.day.GetSixtyCycle()
+	if o.hour >= 23 {
+		d = d.Next(1)
+	}
+	heavenStemIndex := d.GetHeavenStem().GetIndex()%5*2 + earthBranchIndex
 	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex(heavenStemIndex).GetName() + EarthBranch{}.FromIndex(earthBranchIndex).GetName())
 	return *t
 }
 
 // GetTwelveStar 黄道黑道十二神
 func (o LunarHour) GetTwelveStar() TwelveStar {
-	return TwelveStar{}.FromIndex(o.GetSixtyCycle().GetEarthBranch().GetIndex() + (8-o.GetDaySixtyCycle().GetEarthBranch().GetIndex()%6)*2)
+	return TwelveStar{}.FromIndex(o.GetSixtyCycle().GetEarthBranch().GetIndex() + (8-o.GetSixtyCycleHour().GetDay().GetEarthBranch().GetIndex()%6)*2)
 }
 
 // GetNineStar 九星
@@ -216,11 +196,23 @@ func (o LunarHour) GetNineStar() NineStar {
 	return NineStar{}.FromIndex(start + earthBranchIndex)
 }
 
-// GetSolarTime 获取时辰对应的公历时间
+// GetSolarTime 公历时刻
 func (o LunarHour) GetSolarTime() SolarTime {
-	d := o.day.GetSolarDay()
-	t, _ := SolarTime{}.FromYmdHms(d.GetYear(), d.GetMonth(), d.GetDay(), o.hour, o.minute, o.second)
-	return *t
+	if o.solarTime == nil {
+		d := o.day.GetSolarDay()
+		t, _ := SolarTime{}.FromYmdHms(d.GetYear(), d.GetMonth(), d.GetDay(), o.hour, o.minute, o.second)
+		o.solarTime = t
+	}
+	return *o.solarTime
+}
+
+// GetSixtyCycleHour 干支时辰
+func (o LunarHour) GetSixtyCycleHour() SixtyCycleHour {
+	if o.sixtyCycleHour == nil {
+		h := o.GetSolarTime().GetSixtyCycleHour()
+		o.sixtyCycleHour = &h
+	}
+	return *o.sixtyCycleHour
 }
 
 // GetEightChar 八字
@@ -230,12 +222,12 @@ func (o LunarHour) GetEightChar() EightChar {
 
 // GetRecommends 宜
 func (o LunarHour) GetRecommends() ([]Taboo, error) {
-	return Taboo{}.GetHourRecommends(o.GetDaySixtyCycle(), o.GetSixtyCycle())
+	return Taboo{}.GetHourRecommends(o.GetSixtyCycleHour().GetDay(), o.GetSixtyCycle())
 }
 
 // GetAvoids 忌
 func (o LunarHour) GetAvoids() ([]Taboo, error) {
-	return Taboo{}.GetHourAvoids(o.GetDaySixtyCycle(), o.GetSixtyCycle())
+	return Taboo{}.GetHourAvoids(o.GetSixtyCycleHour().GetDay(), o.GetSixtyCycle())
 }
 
 // GetMinorRen 小六壬

@@ -18,7 +18,7 @@ func (DecadeFortune) FromChildLimit(childLimit ChildLimit, index int) DecadeFort
 
 // GetStartAge 开始年龄
 func (o DecadeFortune) GetStartAge() int {
-	return o.childLimit.GetEndTime().GetYear() - o.childLimit.GetStartTime().GetYear() + 1 + o.index*10
+	return o.childLimit.GetEndSixtyCycleYear().GetYear() - o.childLimit.GetStartSixtyCycleYear().GetYear() + 1 + o.index*10
 }
 
 // GetEndAge 结束年龄
@@ -26,14 +26,24 @@ func (o DecadeFortune) GetEndAge() int {
 	return o.GetStartAge() + 9
 }
 
-// GetStartLunarYear 开始农历年
+// Deprecated: Use GetStartSixtyCycleYear instead.
 func (o DecadeFortune) GetStartLunarYear() LunarYear {
 	return o.childLimit.GetEndLunarYear().Next(o.index * 10)
 }
 
-// GetEndLunarYear 结束农历年
+// Deprecated: Use GetEndSixtyCycleYear instead.
 func (o DecadeFortune) GetEndLunarYear() LunarYear {
 	return o.GetStartLunarYear().Next(9)
+}
+
+// GetStartSixtyCycleYear 开始干支年
+func (o DecadeFortune) GetStartSixtyCycleYear() SixtyCycleYear {
+	return o.childLimit.GetEndSixtyCycleYear().Next(o.index * 10)
+}
+
+// GetEndSixtyCycleYear 结束干支年
+func (o DecadeFortune) GetEndSixtyCycleYear() SixtyCycleYear {
+	return o.GetStartSixtyCycleYear().Next(9)
 }
 
 // GetSixtyCycle 干支

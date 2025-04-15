@@ -18,12 +18,17 @@ func (Fortune) FromChildLimit(childLimit ChildLimit, index int) Fortune {
 
 // GetAge 年龄
 func (o Fortune) GetAge() int {
-	return o.childLimit.GetEndTime().GetYear() - o.childLimit.GetStartTime().GetYear() + 1 + o.index
+	return o.childLimit.GetEndSixtyCycleYear().GetYear() - o.childLimit.GetStartSixtyCycleYear().GetYear() + 1 + o.index
 }
 
-// GetLunarYear 农历年
+// Deprecated: Use GetSixtyCycleYear instead.
 func (o Fortune) GetLunarYear() LunarYear {
 	return o.childLimit.GetEndLunarYear().Next(o.index)
+}
+
+// GetSixtyCycleYear 干支年
+func (o Fortune) GetSixtyCycleYear() SixtyCycleYear {
+	return o.childLimit.GetEndSixtyCycleYear().Next(o.index)
 }
 
 // GetSixtyCycle 干支

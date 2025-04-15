@@ -166,6 +166,11 @@ func (o SolarTime) GetLunarHour() LunarHour {
 	return *h
 }
 
+// GetSixtyCycleHour 干支时辰
+func (o SolarTime) GetSixtyCycleHour() SixtyCycleHour {
+	return SixtyCycleHour{}.FromSolarTime(o)
+}
+
 // GetTerm 节气
 func (o SolarTime) GetTerm() SolarTerm {
 	y := o.GetYear()

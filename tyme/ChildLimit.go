@@ -88,9 +88,14 @@ func (o ChildLimit) GetEndTime() SolarTime {
 	return o.info.GetEndTime()
 }
 
-// GetStartDecadeFortune 大运
+// GetStartDecadeFortune 起运大运
 func (o ChildLimit) GetStartDecadeFortune() DecadeFortune {
 	return DecadeFortune{}.FromChildLimit(o, 0)
+}
+
+// GetDecadeFortune 所属大运
+func (o ChildLimit) GetDecadeFortune() DecadeFortune {
+	return DecadeFortune{}.FromChildLimit(o, -1)
 }
 
 // GetStartFortune 小运
@@ -98,8 +103,34 @@ func (o ChildLimit) GetStartFortune() Fortune {
 	return Fortune{}.FromChildLimit(o, 0)
 }
 
-// GetEndLunarYear 结束农历年
+// Deprecated: Use GetEndSixtyCycleYear instead.
 func (o ChildLimit) GetEndLunarYear() LunarYear {
 	y, _ := LunarYear{}.FromYear(o.GetStartTime().GetLunarHour().GetYear() + o.GetEndTime().GetYear() - o.GetStartTime().GetYear())
 	return *y
+}
+
+// GetStartSixtyCycleYear 开始(即出生)干支年
+func (o ChildLimit) GetStartSixtyCycleYear() SixtyCycleYear {
+	y, _ := SixtyCycleYear{}.FromYear(o.GetStartTime().GetYear())
+	return *y
+}
+
+// GetEndSixtyCycleYear 结束(即起运)干支年
+func (o ChildLimit) GetEndSixtyCycleYear() SixtyCycleYear {
+	y, _ := SixtyCycleYear{}.FromYear(o.GetEndTime().GetYear())
+	return *y
+}
+
+// GetStartAge 开始年龄
+func (o ChildLimit) GetStartAge() int {
+	return 1
+}
+
+// GetEndAge 结束年龄
+func (o ChildLimit) GetEndAge() int {
+	n := o.GetEndSixtyCycleYear().GetYear() - o.GetStartSixtyCycleYear().GetYear()
+	if n > 1 {
+		return n
+	}
+	return 1
 }

@@ -110,7 +110,7 @@ func TestEightChar4(t *testing.T) {
 	}
 
 	excepted = "壬午"
-	got = childLimit.GetStartDecadeFortune().GetStartLunarYear().GetSixtyCycle().GetName()
+	got = childLimit.GetStartDecadeFortune().GetStartSixtyCycleYear().GetSixtyCycle().GetName()
 	if excepted != got {
 		t.Errorf("excepted: %v, got: %v", excepted, got)
 	}

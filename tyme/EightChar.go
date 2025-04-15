@@ -90,14 +90,12 @@ func (o EightChar) GetOwnSign() SixtyCycle {
 
 // GetBodySign 身宫
 func (o EightChar) GetBodySign() SixtyCycle {
-	offset := o.month.GetEarthBranch().GetIndex() + o.hour.GetEarthBranch().GetIndex()
-	offset %= 12
-	offset -= 1
+	offset := (o.month.GetEarthBranch().GetIndex() + o.hour.GetEarthBranch().GetIndex() - 1) % 12
 	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex((o.year.GetHeavenStem().GetIndex()+1)*2+offset).GetName() + EarthBranch{}.FromIndex(2+offset).GetName())
 	return *t
 }
 
-// GetDuty 建除十二值神
+// Deprecated: Use SixtyCycleDay.GetDuty instead.
 func (o EightChar) GetDuty() Duty {
 	return Duty{}.FromIndex(o.day.GetEarthBranch().GetIndex() - o.month.GetEarthBranch().GetIndex())
 }

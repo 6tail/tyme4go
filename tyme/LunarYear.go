@@ -119,16 +119,21 @@ func (o LunarYear) GetNineStar() NineStar {
 	return NineStar{}.FromIndex(63 + o.GetTwenty().GetSixty().GetIndex()*3 - o.GetSixtyCycle().GetIndex())
 }
 
-// GetJupiterDirection  太岁方位
+// GetJupiterDirection 太岁方位
 func (o LunarYear) GetJupiterDirection() Direction {
 	return Direction{}.FromIndex([]int{0, 7, 7, 2, 3, 3, 8, 1, 1, 6, 0, 0}[o.GetSixtyCycle().GetEarthBranch().GetIndex()])
+}
+
+// GetFirstMonth 首月（农历月，即一月，俗称正月）
+func (o LunarYear) GetFirstMonth() LunarMonth {
+	m, _ := LunarMonth{}.FromYm(o.year, 1)
+	return *m
 }
 
 // GetMonths 月份列表，一般有12个月，当年有闰月时，有13个月。
 func (o LunarYear) GetMonths() []LunarMonth {
 	var l []LunarMonth
-	t, _ := LunarMonth{}.FromYm(o.year, 1)
-	m := *t
+	m := o.GetFirstMonth()
 	for i := 0; m.GetYear() == o.year; i++ {
 		l = append(l, m)
 		m = m.Next(1)

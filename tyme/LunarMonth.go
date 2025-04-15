@@ -244,7 +244,7 @@ func (o LunarMonth) Next(n int) LunarMonth {
 	return *month
 }
 
-// GetDays 获取本月的农历日列表
+// GetDays 本月的农历日列表
 func (o LunarMonth) GetDays() []LunarDay {
 	var l []LunarDay
 	size := o.GetDayCount()
@@ -257,7 +257,7 @@ func (o LunarMonth) GetDays() []LunarDay {
 	return l
 }
 
-// GetWeeks 获取本月的农历周列表
+// GetWeeks 本月的农历周列表
 func (o LunarMonth) GetWeeks(start int) []LunarWeek {
 	var l []LunarWeek
 	size := o.GetWeekCount(start)

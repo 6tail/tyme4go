@@ -11,8 +11,7 @@ type FetusDay struct {
 	direction        Direction
 }
 
-func (FetusDay) FromLunarDay(lunarDay LunarDay) FetusDay {
-	sixtyCycle := lunarDay.GetSixtyCycle()
+func (FetusDay) New(sixtyCycle SixtyCycle) FetusDay {
 	fetusHeavenStem := FetusHeavenStem{}.New(sixtyCycle.GetHeavenStem().GetIndex() % 5)
 	fetusEarthBranch := FetusEarthBranch{}.New(sixtyCycle.GetEarthBranch().GetIndex() % 6)
 	index := []int{3, 3, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, -9, -9, -9, -9, -9, -5, -5, -1, -1, -1, -3, -7, -7, -7, -7, -5, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2, 3, 3, 3, 3}[sixtyCycle.GetIndex()]
@@ -28,6 +27,14 @@ func (FetusDay) FromLunarDay(lunarDay LunarDay) FetusDay {
 		side:             side,
 		direction:        direction,
 	}
+}
+
+func (FetusDay) FromLunarDay(lunarDay LunarDay) FetusDay {
+	return FetusDay{}.New(lunarDay.GetSixtyCycle())
+}
+
+func (FetusDay) FromSixtyCycleDay(sixtyCycleDay SixtyCycleDay) FetusDay {
+	return FetusDay{}.New(sixtyCycleDay.GetSixtyCycle())
 }
 
 // GetSide 内外
