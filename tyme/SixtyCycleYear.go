@@ -67,14 +67,13 @@ func (o SixtyCycleYear) GetFirstMonth() SixtyCycleMonth {
 	return SixtyCycleMonth{}.New(o, *m)
 }
 
-// GetMonths 月份列表，一般有12个月，当年有闰月时，有13个月。
-func (o SixtyCycleYear) GetMonths() []LunarMonth {
-	var l []LunarMonth
-	t, _ := LunarMonth{}.FromYm(o.year, 1)
-	m := *t
-	for i := 0; m.GetYear() == o.year; i++ {
-		l = append(l, m)
-		m = m.Next(1)
+// GetMonths 干支月列表
+func (o SixtyCycleYear) GetMonths() []SixtyCycleMonth {
+	var l []SixtyCycleMonth
+	m := o.GetFirstMonth()
+	l = append(l, m)
+	for i := 1; i < 12; i++ {
+		l = append(l, m.Next(i))
 	}
 	return l
 }
