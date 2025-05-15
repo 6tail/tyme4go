@@ -77,21 +77,39 @@ func (o EightChar) GetFetalBreath() SixtyCycle {
 
 // GetOwnSign 命宫
 func (o EightChar) GetOwnSign() SixtyCycle {
-	offset := o.month.GetEarthBranch().Next(-1).GetIndex() + o.hour.GetEarthBranch().Next(-1).GetIndex()
+	m := o.month.GetEarthBranch().GetIndex() - 1
+	if m < 1 {
+		m += 12
+	}
+	h := o.hour.GetEarthBranch().GetIndex() - 1
+	if h < 1 {
+		h += 12
+	}
+	offset := m + h
 	if offset >= 14 {
 		offset = 26 - offset
 	} else {
 		offset = 14 - offset
 	}
-	offset -= 1
-	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex((o.year.GetHeavenStem().GetIndex()+1)*2+offset).GetName() + EarthBranch{}.FromIndex(2+offset).GetName())
+	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex((o.year.GetHeavenStem().GetIndex()+1)*2+offset-1).GetName() + EarthBranch{}.FromIndex(offset+1).GetName())
 	return *t
 }
 
 // GetBodySign 身宫
 func (o EightChar) GetBodySign() SixtyCycle {
-	offset := (o.month.GetEarthBranch().GetIndex() + o.hour.GetEarthBranch().GetIndex() - 1) % 12
-	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex((o.year.GetHeavenStem().GetIndex()+1)*2+offset).GetName() + EarthBranch{}.FromIndex(2+offset).GetName())
+	m := o.month.GetEarthBranch().GetIndex() - 1
+	if m < 1 {
+		m += 12
+	}
+	h := o.hour.GetEarthBranch().GetIndex() + 1
+	if h < 1 {
+		h += 12
+	}
+	offset := m + h
+	if offset > 12 {
+		offset -= 12
+	}
+	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex((o.year.GetHeavenStem().GetIndex()+1)*2+offset-1).GetName() + EarthBranch{}.FromIndex(offset+1).GetName())
 	return *t
 }
 

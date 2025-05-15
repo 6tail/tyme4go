@@ -93,7 +93,7 @@ func (LunarFestival) FromIndex(year int, index int) (*LunarFestival, error) {
 }
 
 func (LunarFestival) FromYmd(year int, month int, day int) (*LunarFestival, error) {
-	re, err := regexp.Compile(fmt.Sprintf("@\\d{2}0%02d%02d\\d+", month, day))
+	re, err := regexp.Compile(fmt.Sprintf("@\\d{2}0%02d%02d", month, day))
 	if err != nil {
 		return nil, err
 	}

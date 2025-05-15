@@ -20,3 +20,12 @@ func TestLunarFestival0(t *testing.T) {
 		t.Errorf("excepted: %v, got: %v", excepted, got)
 	}
 }
+
+func TestLunarFestival1(t *testing.T) {
+	d, _ := tyme.LunarDay{}.FromYmd(2025, 5, 5)
+	excepted := "农历乙巳年五月初五 端午节"
+	got := d.GetFestival().String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+}
