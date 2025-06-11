@@ -10,7 +10,7 @@ import (
 
 // LunarYearLeap 缓存{闰月:年}
 var LunarYearLeap = map[int]*list.List{}
-var once sync.Once
+var onceLunarYear sync.Once
 
 // LunarYear 农历年
 type LunarYear struct {
@@ -20,7 +20,7 @@ type LunarYear struct {
 }
 
 func (LunarYear) FromYear(year int) (*LunarYear, error) {
-	once.Do(func() {
+	onceLunarYear.Do(func() {
 		LunarYearLeap = make(map[int]*list.List)
 		lunarMonthCache = make(map[string][]interface{})
 		chars := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_@"

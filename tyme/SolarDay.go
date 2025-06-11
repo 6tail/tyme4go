@@ -335,6 +335,11 @@ func (o SolarDay) GetSixtyCycleDay() SixtyCycleDay {
 	return SixtyCycleDay{}.FromSolarDay(o)
 }
 
+// GetRabByungDay 藏历日
+func (o SolarDay) GetRabByungDay() (*RabByungDay, error) {
+	return RabByungDay{}.FromSolarDay(o)
+}
+
 // GetLegalHoliday 法定假日，如果当天不是法定假日，返回nil
 func (o SolarDay) GetLegalHoliday() *LegalHoliday {
 	f, _ := LegalHoliday{}.FromYmd(o.GetYear(), o.GetMonth(), o.day)

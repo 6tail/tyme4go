@@ -86,3 +86,8 @@ func (o SolarYear) GetHalfYears() []SolarHalfYear {
 	}
 	return l
 }
+
+// GetRabByungYear 藏历年
+func (o SolarYear) GetRabByungYear() (*RabByungYear, error) {
+	return RabByungYear{}.FromYear(o.year)
+}

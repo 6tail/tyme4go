@@ -23,3 +23,7 @@ func (Zodiac) FromName(name string) (*Zodiac, error) {
 func (o Zodiac) Next(n int) Zodiac {
 	return o.FromIndex(o.nextIndex(n))
 }
+
+func (o Zodiac) Equals(target Zodiac) bool {
+	return o.String() == target.String()
+}
