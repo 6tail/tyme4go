@@ -169,14 +169,19 @@ func (o SolarDay) GetSolarWeek(start int) SolarWeek {
 
 // GetPhenologyDay 七十二候
 func (o SolarDay) GetPhenologyDay() PhenologyDay {
-	term := o.GetTerm()
-	dayIndex := o.Subtract(term.GetJulianDay().GetSolarDay())
+	d := o.GetTermDay()
+	dayIndex := d.GetDayIndex()
 	index := dayIndex / 5
 	if index > 2 {
 		index = 2
 	}
-	dayIndex -= index * 5
-	return PhenologyDay{}.New(Phenology{}.FromIndex(term.GetIndex()*3+index), dayIndex)
+	term := d.GetSolarTerm()
+	return PhenologyDay{}.New(Phenology{}.FromIndex(term.GetYear(), term.GetIndex()*3+index), dayIndex-index*5)
+}
+
+// GetPhenology 候
+func (o SolarDay) GetPhenology() Phenology {
+	return o.GetPhenologyDay().GetPhenology()
 }
 
 // GetDogDay 三伏天

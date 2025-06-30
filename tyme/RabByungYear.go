@@ -122,7 +122,7 @@ func (y RabByungYear) GetFirstMonth() RabByungMonth {
 }
 
 func (y RabByungYear) GetMonthCount() int {
-	if y.GetLeapMonth() == 0 {
+	if y.GetLeapMonth() < 1 {
 		return 12
 	}
 	return 13
@@ -131,7 +131,7 @@ func (y RabByungYear) GetMonthCount() int {
 func (y RabByungYear) GetMonths() []RabByungMonth {
 	var months []RabByungMonth
 	leapMonth := y.GetLeapMonth()
-	for i := 1; i <= 12; i++ {
+	for i := 1; i < 13; i++ {
 		m, _ := NewRabByungMonth(y, i)
 		months = append(months, *m)
 		if i == leapMonth {

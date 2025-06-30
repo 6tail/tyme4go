@@ -60,7 +60,7 @@ func (o SixtyCycleYear) GetJupiterDirection() Direction {
 	return Direction{}.FromIndex([]int{0, 7, 7, 2, 3, 3, 8, 1, 1, 6, 0, 0}[o.GetSixtyCycle().GetEarthBranch().GetIndex()])
 }
 
-// GetFirstMonth 首月（依据五虎遁和正月起寅的规律）
+// GetFirstMonth 首月（五虎遁：甲己之年丙作首，乙庚之岁戊为头，丙辛必定寻庚起，丁壬壬位顺行流，若问戊癸何方发，甲寅之上好追求。）
 func (o SixtyCycleYear) GetFirstMonth() SixtyCycleMonth {
 	h := HeavenStem{}.FromIndex((o.GetSixtyCycle().GetHeavenStem().GetIndex() + 1) * 2)
 	m, _ := SixtyCycle{}.FromName(h.GetName() + "寅")

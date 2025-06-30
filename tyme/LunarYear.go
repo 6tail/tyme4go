@@ -69,10 +69,10 @@ func (o LunarYear) GetDayCount() int {
 
 // GetMonthCount 月数
 func (o LunarYear) GetMonthCount() int {
-	if o.GetLeapMonth() > 0 {
-		return 13
+	if o.GetLeapMonth() < 1 {
+		return 12
 	}
-	return 12
+	return 13
 }
 
 // GetName 名称(依据国家标准《农历的编算和颁行》GB/T 33661-2017，农历年有2种命名方法：干支纪年法和生肖纪年法，这里默认采用干支纪年法)

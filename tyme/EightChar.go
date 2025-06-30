@@ -97,15 +97,11 @@ func (o EightChar) GetOwnSign() SixtyCycle {
 
 // GetBodySign 身宫
 func (o EightChar) GetBodySign() SixtyCycle {
-	m := o.month.GetEarthBranch().GetIndex() - 1
-	if m < 1 {
-		m += 12
+	offset := o.month.GetEarthBranch().GetIndex() - 1
+	if offset < 1 {
+		offset += 12
 	}
-	h := o.hour.GetEarthBranch().GetIndex() + 1
-	if h < 1 {
-		h += 12
-	}
-	offset := m + h
+	offset += o.hour.GetEarthBranch().GetIndex() + 1
 	if offset > 12 {
 		offset -= 12
 	}

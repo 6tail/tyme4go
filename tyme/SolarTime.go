@@ -173,15 +173,17 @@ func (o SolarTime) GetSixtyCycleHour() SixtyCycleHour {
 
 // GetTerm 节气
 func (o SolarTime) GetTerm() SolarTerm {
-	y := o.GetYear()
-	i := o.GetMonth() * 2
-	if i == 24 {
-		y += 1
-		i = 0
-	}
-	term := SolarTerm{}.FromIndex(y, i)
-	for o.IsBefore(term.GetJulianDay().GetSolarTime()) {
+	term := o.GetSolarDay().GetTerm()
+	if o.IsBefore(term.GetJulianDay().GetSolarTime()) {
 		term = term.Next(-1)
 	}
 	return term
+}
+
+func (o SolarTime) GetPhenology() Phenology {
+	p := o.GetSolarDay().GetPhenology()
+	if o.IsBefore(p.GetJulianDay().GetSolarTime()) {
+		p = p.Next(-1)
+	}
+	return p
 }

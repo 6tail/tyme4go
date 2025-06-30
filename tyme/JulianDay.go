@@ -30,8 +30,8 @@ func (JulianDay) FromYmdHms(year int, month int, day int, hour int, minute int, 
 		year--
 	}
 	if g {
-		n = int(float64(year) / 100)
-		n = 2 - n + int(float64(n)/4)
+		n = int(float64(year) * 0.01)
+		n = 2 - n + int(float64(n)*0.25)
 	}
 	return JulianDay{}.FromJulianDay(float64(int(365.25*float64(year+4716))) + float64(int(30.6001*float64(month+1))) + d + float64(n) - 1524.5)
 }
@@ -65,7 +65,7 @@ func (o JulianDay) GetSolarTime() SolarTime {
 
 	if d >= 2299161 {
 		c := int((float64(d) - 1867216.25) / 36524.25)
-		d += 1 + c - (int)(float64(c)/4)
+		d += 1 + c - (int)(float64(c)*0.25)
 	}
 	d += 1524
 	year := int((float64(d) - 122.1) / 365.25)
@@ -74,12 +74,12 @@ func (o JulianDay) GetSolarTime() SolarTime {
 	d -= int(30.601 * float64(month))
 	day := d
 	if month > 13 {
-		month -= 13
-		year -= 4715
+		month -= 12
 	} else {
-		month -= 1
-		year -= 4716
+		year -= 1
 	}
+	month -= 1
+	year -= 4715
 	f *= 24
 	hour := int(f)
 
@@ -90,20 +90,12 @@ func (o JulianDay) GetSolarTime() SolarTime {
 	f -= float64(minute)
 	f *= 60
 	second := int(math.Round(f))
-	if second > 59 {
-		second -= 60
-		minute += 1
+	if second < 60 {
+		t, _ := SolarTime{}.FromYmdHms(year, month, day, hour, minute, second)
+		return *t
 	}
-	if minute > 59 {
-		minute -= 60
-		hour += 1
-	}
-	if hour > 23 {
-		hour -= 24
-		day += 1
-	}
-	t, _ := SolarTime{}.FromYmdHms(year, month, day, hour, minute, second)
-	return *t
+	t, _ := SolarTime{}.FromYmdHms(year, month, day, hour, minute, second-60)
+	return t.Next(60)
 }
 
 // GetWeek 星期

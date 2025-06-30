@@ -37,3 +37,70 @@ func TestPhenology0(t *testing.T) {
 		t.Errorf("excepted: %v, got: %v", excepted2, got2)
 	}
 }
+
+func TestPhenology1(t *testing.T) {
+	p := tyme.Phenology{}.FromIndex(2026, 1)
+	jd := p.GetJulianDay()
+
+	excepted := "麋角解"
+	got := p.GetName()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+
+	excepted = "2025年12月26日"
+	got = jd.GetSolarDay().String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+
+	excepted = "2025年12月26日 20:49:39"
+	got = jd.GetSolarTime().String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+}
+
+func TestPhenology2(t *testing.T) {
+	d, _ := tyme.SolarDay{}.FromYmd(2025, 12, 26)
+	p := d.GetPhenology()
+	jd := p.GetJulianDay()
+
+	excepted := "麋角解"
+	got := p.GetName()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+
+	excepted = "2025年12月26日"
+	got = jd.GetSolarDay().String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+
+	excepted = "2025年12月26日 20:49:39"
+	got = jd.GetSolarTime().String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+}
+
+func TestPhenology3(t *testing.T) {
+	d, _ := tyme.SolarTime{}.FromYmdHms(2025, 12, 26, 20, 49, 38)
+	p := d.GetPhenology()
+
+	excepted := "蚯蚓结"
+	got := p.GetName()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+
+	d, _ = tyme.SolarTime{}.FromYmdHms(2025, 12, 26, 20, 49, 39)
+	p = d.GetPhenology()
+
+	excepted = "麋角解"
+	got = p.GetName()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+}

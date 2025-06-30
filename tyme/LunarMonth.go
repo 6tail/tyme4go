@@ -202,33 +202,21 @@ func (o LunarMonth) Next(n int) LunarMonth {
 	}
 	m := o.indexInYear + 1 + n
 	y := o.year
-	leapMonth := y.GetLeapMonth()
 	if n > 0 {
-		monthCount := 12
-		if leapMonth > 0 {
-			monthCount = 13
-		}
+		monthCount := y.GetMonthCount()
 		for m > monthCount {
 			m -= monthCount
 			y = y.Next(1)
-			leapMonth = y.GetLeapMonth()
-			monthCount = 12
-			if leapMonth > 0 {
-				monthCount = 13
-			}
+			monthCount = y.GetMonthCount()
 		}
 	} else {
 		for m <= 0 {
 			y = y.Next(-1)
-			leapMonth = y.GetLeapMonth()
-			monthCount := 12
-			if leapMonth > 0 {
-				monthCount = 13
-			}
-			m += monthCount
+			m += y.GetMonthCount()
 		}
 	}
 	leap := false
+	leapMonth := y.GetLeapMonth()
 	if leapMonth > 0 {
 		if m == leapMonth+1 {
 			leap = true

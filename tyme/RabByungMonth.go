@@ -66,7 +66,7 @@ func NewRabByungMonth(year RabByungYear, month int) (*RabByungMonth, error) {
 		return nil, fmt.Errorf("illegal leap month %d in rab-byung year %d", m, y)
 	}
 	index := m - 1
-	if leap || (leapMonth > 0 && leapMonth < m) {
+	if leap || (0 < leapMonth && leapMonth < m) {
 		index++
 	}
 	return &RabByungMonth{
@@ -146,12 +146,8 @@ func (o RabByungMonth) Next(n int) (*RabByungMonth, error) {
 	}
 	m := o.indexInYear + 1 + n
 	y := &o.year
-	leapMonth := y.GetLeapMonth()
 	if n > 0 {
-		monthCount := 12
-		if leapMonth > 0 {
-			monthCount = 13
-		}
+		monthCount := y.GetMonthCount()
 		for m > monthCount {
 			m -= monthCount
 			ny, err := y.Next(1)
@@ -159,11 +155,7 @@ func (o RabByungMonth) Next(n int) (*RabByungMonth, error) {
 				return nil, err
 			}
 			y = ny
-			leapMonth = y.GetLeapMonth()
-			monthCount = 12
-			if leapMonth > 0 {
-				monthCount = 13
-			}
+			monthCount = y.GetMonthCount()
 		}
 	} else {
 		for m <= 0 {
@@ -172,15 +164,12 @@ func (o RabByungMonth) Next(n int) (*RabByungMonth, error) {
 				return nil, err
 			}
 			y = ny
-			leapMonth = y.GetLeapMonth()
-			m += 12
-			if leapMonth > 0 {
-				m += 1
-			}
+			m += y.GetMonthCount()
 		}
 	}
 
 	leap := false
+	leapMonth := y.GetLeapMonth()
 	if leapMonth > 0 {
 		if m == leapMonth+1 {
 			leap = true
