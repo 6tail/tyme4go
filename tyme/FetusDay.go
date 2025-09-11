@@ -71,12 +71,12 @@ func (o FetusDay) GetName() string {
 
 	s += " "
 
-	directionName := o.direction.GetName()
 	if IN == o.side {
 		s += "房"
 	}
 	s += o.side.GetName()
 
+	directionName := o.direction.GetName()
 	if OUT == o.side && strings.Contains("北南西东", directionName) {
 		s += "正"
 	}

@@ -47,7 +47,7 @@ func (SixtyCycleDay) FromSolarDay(solarDay SolarDay) SixtyCycleDay {
 	m, _ := LunarMonth{}.FromYm(solarYear, 1)
 	return SixtyCycleDay{
 		solarDay: solarDay,
-		month:    SixtyCycleMonth{}.New(*y, m.GetSixtyCycle().Next(int(math.Floor(float64(index)/2)))),
+		month:    SixtyCycleMonth{}.New(*y, m.GetSixtyCycle().Next(int(math.Floor(float64(index)*0.5)))),
 		day:      lunarDay.GetSixtyCycle(),
 	}
 }
@@ -103,11 +103,9 @@ func (o SixtyCycleDay) GetTwelveStar() TwelveStar {
 func (o SixtyCycleDay) GetNineStar() NineStar {
 	d := o.solarDay
 	dongZhi := SolarTerm{}.FromIndex(d.GetYear(), 0)
-	xiaZhi := dongZhi.Next(12)
-	dongZhi2 := dongZhi.Next(24)
 	dongZhiSolar := dongZhi.GetJulianDay().GetSolarDay()
-	xiaZhiSolar := xiaZhi.GetJulianDay().GetSolarDay()
-	dongZhiSolar2 := dongZhi2.GetJulianDay().GetSolarDay()
+	xiaZhiSolar := dongZhi.Next(12).GetJulianDay().GetSolarDay()
+	dongZhiSolar2 := dongZhi.Next(24).GetJulianDay().GetSolarDay()
 	dongZhiIndex := dongZhiSolar.GetLunarDay().GetSixtyCycle().GetIndex()
 	xiaZhiIndex := xiaZhiSolar.GetLunarDay().GetSixtyCycle().GetIndex()
 	dongZhiIndex2 := dongZhiSolar2.GetLunarDay().GetSixtyCycle().GetIndex()

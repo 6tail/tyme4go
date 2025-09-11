@@ -45,7 +45,7 @@ func (SixtyCycleHour) FromSolarTime(solarTime SolarTime) SixtyCycleHour {
 	m, _ := LunarMonth{}.FromYm(solarYear, 1)
 	return SixtyCycleHour{
 		solarTime: solarTime,
-		day:       SixtyCycleDay{}.New(solarTime.GetSolarDay(), SixtyCycleMonth{}.New(*y, m.GetSixtyCycle().Next(int(math.Floor(float64(index)/2)))), d),
+		day:       SixtyCycleDay{}.New(solarTime.GetSolarDay(), SixtyCycleMonth{}.New(*y, m.GetSixtyCycle().Next(int(math.Floor(float64(index)*0.5)))), d),
 		hour:      lunarHour.GetSixtyCycle(),
 	}
 }
@@ -110,17 +110,14 @@ func (o SixtyCycleHour) GetTwelveStar() TwelveStar {
 func (o SixtyCycleHour) GetNineStar() NineStar {
 	solar := o.solarTime.GetSolarDay()
 	dongZhi := SolarTerm{}.FromIndex(solar.GetYear(), 0)
-	xiaZhi := dongZhi.Next(12)
-	asc := !solar.IsBefore(dongZhi.GetJulianDay().GetSolarDay()) && solar.IsBefore(xiaZhi.GetJulianDay().GetSolarDay())
-	start := []int{8, 5, 2}[o.GetDay().GetEarthBranch().GetIndex()%3]
-	if asc {
-		start = 8 - start
-	}
 	earthBranchIndex := o.GetIndexInDay() % 12
-	if !asc {
-		earthBranchIndex = -earthBranchIndex
+	index := []int{8, 5, 2}[o.GetDay().GetEarthBranch().GetIndex()%3]
+	if !solar.IsBefore(dongZhi.GetJulianDay().GetSolarDay()) && solar.IsBefore(dongZhi.Next(12).GetJulianDay().GetSolarDay()) {
+		index = 8 + earthBranchIndex - index
+	} else {
+		index -= earthBranchIndex
 	}
-	return NineStar{}.FromIndex(start + earthBranchIndex)
+	return NineStar{}.FromIndex(index)
 }
 
 // GetEightChar 八字

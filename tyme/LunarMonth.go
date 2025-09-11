@@ -3,10 +3,11 @@ package tyme
 import (
 	"fmt"
 	"math"
+	"sync"
 )
 
 var LunarMonthNames = []string{"正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"}
-var lunarMonthCache map[string][]interface{}
+var lunarMonthCache sync.Map
 
 // LunarMonth 农历月
 type LunarMonth struct {
@@ -65,8 +66,7 @@ func (LunarMonth) New(year int, month int) (*LunarMonth, error) {
 	}
 
 	// 冬至
-	dongZhi := SolarTerm{}.FromIndex(year, 0)
-	dongZhiJd := dongZhi.GetCursoryJulianDay()
+	dongZhiJd := SolarTerm{}.FromIndex(year, 0).GetCursoryJulianDay()
 
 	// 冬至前的初一，今年首朔的日月黄经差
 	w := CalcShuo(dongZhiJd)
@@ -112,8 +112,8 @@ func (LunarMonth) FromYm(year int, month int) (*LunarMonth, error) {
 	var m *LunarMonth = nil
 	var err error = nil
 	key := fmt.Sprintf("%d%d", year, month)
-	if c, ok := lunarMonthCache[key]; ok {
-		t := LunarMonth{}.fromCache(c)
+	if c, ok := lunarMonthCache.Load(key); ok {
+		t := LunarMonth{}.fromCache(c.([]interface{}))
 		m = &t
 	} else {
 		m, err = LunarMonth{}.New(year, month)
@@ -124,7 +124,7 @@ func (LunarMonth) FromYm(year int, month int) (*LunarMonth, error) {
 			l = append(l, m.GetDayCount())
 			l = append(l, m.GetIndexInYear())
 			l = append(l, m.GetFirstJulianDay().GetDay())
-			lunarMonthCache[key] = l
+			lunarMonthCache.Store(key, l)
 		}
 	}
 	return m, err
@@ -277,10 +277,10 @@ func (o LunarMonth) GetNineStar() NineStar {
 func (o LunarMonth) GetJupiterDirection() Direction {
 	sixtyCycle := o.GetSixtyCycle()
 	n := []int{7, -1, 1, 3}[sixtyCycle.GetEarthBranch().Next(-2).GetIndex()%4]
-	if n == -1 {
-		return sixtyCycle.GetHeavenStem().GetDirection()
+	if n != -1 {
+		return Direction{}.FromIndex(n)
 	}
-	return Direction{}.FromIndex(n)
+	return sixtyCycle.GetHeavenStem().GetDirection()
 }
 
 // GetFetus 逐月胎神

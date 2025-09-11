@@ -290,8 +290,7 @@ func (o SolarDay) GetPlumRainDay() *PlumRainDay {
 	start = start.Next(start.GetLunarDay().GetSixtyCycle().GetHeavenStem().StepsTo(2))
 
 	// 小暑
-	slightHeat := grainInEar.Next(2)
-	end := slightHeat.GetJulianDay().GetSolarDay()
+	end := grainInEar.Next(2).GetJulianDay().GetSolarDay()
 	// 小暑后的第1个未日
 	end = end.Next(end.GetLunarDay().GetSixtyCycle().GetEarthBranch().StepsTo(7))
 

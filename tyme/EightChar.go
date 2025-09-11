@@ -174,9 +174,13 @@ func (o EightChar) GetSolarTimes(startYear int, endYear int) []SolarTime {
 					s = solarTime.GetSecond()
 				}
 				time, _ := SolarTime{}.FromYmdHms(solarDay.GetYear(), solarDay.GetMonth(), solarDay.GetDay(), hour, mi, s)
+				t := *time
+				if d == 30 {
+					t = t.Next(-3600)
+				}
 				// 验证一下
-				if time.GetLunarHour().GetEightChar().Equals(o) {
-					l = append(l, *time)
+				if t.GetLunarHour().GetEightChar().Equals(o) {
+					l = append(l, t)
 				}
 			}
 		}
