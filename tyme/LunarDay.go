@@ -191,9 +191,22 @@ func (o LunarDay) GetFetusDay() FetusDay {
 	return FetusDay{}.FromLunarDay(o)
 }
 
+// GetPhaseDay 月相第几天
+func (o LunarDay) GetPhaseDay() PhaseDay {
+	today := o.GetSolarDay()
+	m := o.month.Next(1)
+	p := Phase{}.FromIndex(m.GetYear(), m.GetMonth(), 0)
+	d := p.GetSolarDay()
+	for d.IsAfter(today) {
+		p = p.Next(-1)
+		d = p.GetSolarDay()
+	}
+	return PhaseDay{}.New(p, today.Subtract(d))
+}
+
 // GetPhase 月相
 func (o LunarDay) GetPhase() Phase {
-	return Phase{}.FromIndex(o.day - 1)
+	return o.GetPhaseDay().GetPhase()
 }
 
 // GetSixStar 六曜

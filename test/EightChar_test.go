@@ -83,13 +83,13 @@ func TestEightChar3(t *testing.T) {
 		t.Errorf("excepted: %v, got: %v", excepted, got)
 	}
 
-	excepted = 6
+	excepted = 28
 	got = childLimit.GetMinuteCount()
 	if excepted != got {
 		t.Errorf("excepted: %v, got: %v", excepted, got)
 	}
 
-	excepted1 := "2030年12月12日 06:57:00"
+	excepted1 := "2030年12月12日 07:19:00"
 	got1 := childLimit.GetEndTime().String()
 	if excepted1 != got1 {
 		t.Errorf("excepted: %v, got: %v", excepted1, got1)

@@ -260,7 +260,7 @@ func (o LunarMonth) GetWeeks(start int) []LunarWeek {
 
 // GetSixtyCycle 干支
 func (o LunarMonth) GetSixtyCycle() SixtyCycle {
-	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex((o.year.GetSixtyCycle().GetHeavenStem().GetIndex()+1)*2+o.indexInYear).GetName() + EarthBranch{}.FromIndex(o.indexInYear+2).GetName())
+	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex(o.year.GetSixtyCycle().GetHeavenStem().GetIndex()*2+o.month+1).GetName() + EarthBranch{}.FromIndex(o.month+1).GetName())
 	return *t
 }
 

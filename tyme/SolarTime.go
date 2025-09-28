@@ -187,3 +187,13 @@ func (o SolarTime) GetPhenology() Phenology {
 	}
 	return p
 }
+
+// GetPhase 月相
+func (o SolarTime) GetPhase() Phase {
+	month := o.GetLunarHour().GetLunarDay().GetLunarMonth().Next(1)
+	p := Phase{}.FromIndex(month.GetYear(), month.GetMonth(), 0)
+	for p.GetSolarTime().IsAfter(o) {
+		p = p.Next(-1)
+	}
+	return p
+}

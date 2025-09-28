@@ -60,19 +60,18 @@ func (o JulianDay) GetSolarDay() SolarDay {
 
 // GetSolarTime 公历时刻
 func (o JulianDay) GetSolarTime() SolarTime {
-	n := int(o.day + 0.5)
-	f := o.day + 0.5 - float64(n)
+	d := int(o.day + 0.5)
+	f := o.day + 0.5 - float64(d)
 
-	if n >= 2299161 {
-		c := int((float64(n) - 1867216.25) / 36524.25)
-		n += 1 + c - (int)(float64(c)*0.25)
+	if d >= 2299161 {
+		c := int((float64(d) - 1867216.25) / 36524.25)
+		d += 1 + c - (int)(float64(c)*0.25)
 	}
-	n += 1524
-	y := int((float64(n) - 122.1) / 365.25)
-	n -= int(365.25 * float64(y))
-	m := int(float64(n) / 30.601)
-	n -= int(30.601 * float64(m))
-	d := n
+	d += 1524
+	y := int((float64(d) - 122.1) / 365.25)
+	d -= int(365.25 * float64(y))
+	m := int(float64(d) / 30.601)
+	d -= int(30.601 * float64(m))
 	if m > 13 {
 		m -= 12
 	} else {
