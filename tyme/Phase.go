@@ -18,7 +18,7 @@ func (Phase) FromIndex(lunarYear int, lunarMonth int, index int) Phase {
 	return Phase{
 		LoopTyme{}.FromIndex(PhaseNames, index),
 		month.GetYear(),
-		month.GetMonth(),
+		month.GetMonthWithLeap(),
 	}
 }
 
@@ -46,7 +46,7 @@ func (o Phase) Next(n int) Phase {
 	if i != 0 {
 		month = month.Next(i)
 	}
-	return o.FromIndex(month.GetYear(), month.GetMonth(), o.nextIndex(n))
+	return o.FromIndex(month.GetYear(), month.GetMonthWithLeap(), o.nextIndex(n))
 }
 
 func (o Phase) getStartSolarTime() SolarTime {

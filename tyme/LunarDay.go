@@ -195,7 +195,7 @@ func (o LunarDay) GetFetusDay() FetusDay {
 func (o LunarDay) GetPhaseDay() PhaseDay {
 	today := o.GetSolarDay()
 	m := o.month.Next(1)
-	p := Phase{}.FromIndex(m.GetYear(), m.GetMonth(), 0)
+	p := Phase{}.FromIndex(m.GetYear(), m.GetMonthWithLeap(), 0)
 	d := p.GetSolarDay()
 	for d.IsAfter(today) {
 		p = p.Next(-1)

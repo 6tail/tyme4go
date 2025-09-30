@@ -378,8 +378,7 @@ func eLon(t float64, n int) float64 {
 	v /= XL0[0]
 	t2 := t * t
 	t3 := t2 * t
-	v += (-0.0728 - 2.7702*t - 1.1019*t2 - 0.0996*t3) / SecondPerRad
-	return v
+	return v + (-0.0728-2.7702*t-1.1019*t2-0.0996*t3)/SecondPerRad
 }
 
 func mLon(t float64, n int) float64 {
@@ -423,15 +422,12 @@ func mLon(t float64, n int) float64 {
 		v += c * tn
 		tn *= t
 	}
-	v /= SecondPerRad
-	return v
+	return v / SecondPerRad
 }
 
 func gxcSunLon(t float64) float64 {
 	t2 := t * t
-	v := -0.043126 + 628.301955*t - 0.000002732*t2
-	e := 0.016708634 - 0.000042037*t - 0.0000001267*t2
-	return -20.49552 * (1 + e*math.Cos(v)) / SecondPerRad
+	return -20.49552 * (1 + (0.016708634-0.000042037*t-0.0000001267*t2)*math.Cos(-0.043126+628.301955*t-0.000002732*t2)) / SecondPerRad
 }
 
 func ev(t float64) float64 {
@@ -479,8 +475,7 @@ func DtT(t float64) float64 {
 
 func mv(t float64) float64 {
 	v := 8399.71 - 914*math.Sin(0.7848+8328.691425*t+0.0001523*t*t)
-	v -= 179*math.Sin(2.543+15542.7543*t) + 160*math.Sin(0.1874+7214.0629*t) + 62*math.Sin(3.14+16657.3828*t) + 34*math.Sin(4.827+16866.9323*t) + 22*math.Sin(4.9+23871.4457*t) + 12*math.Sin(2.59+14914.4523*t) + 7*math.Sin(0.23+6585.7609*t) + 5*math.Sin(0.9+25195.624*t) + 5*math.Sin(2.32-7700.3895*t) + 5*math.Sin(3.88+8956.9934*t) + 5*math.Sin(0.49+7771.3771*t)
-	return v
+	return v - (179*math.Sin(2.543+15542.7543*t) + 160*math.Sin(0.1874+7214.0629*t) + 62*math.Sin(3.14+16657.3828*t) + 34*math.Sin(4.827+16866.9323*t) + 22*math.Sin(4.9+23871.4457*t) + 12*math.Sin(2.59+14914.4523*t) + 7*math.Sin(0.23+6585.7609*t) + 5*math.Sin(0.9+25195.624*t) + 5*math.Sin(2.32-7700.3895*t) + 5*math.Sin(3.88+8956.9934*t) + 5*math.Sin(0.49+7771.3771*t))
 }
 
 func SaLonT(w float64) float64 {
@@ -488,9 +483,7 @@ func SaLonT(w float64) float64 {
 	t := (w - 1.75347 - math.Pi) / v
 	v = ev(t)
 	t += (w - saLon(t, 10)) / v
-	v = ev(t)
-	t += (w - saLon(t, -1)) / v
-	return t
+	return t + (w-saLon(t, -1))/ev(t)
 }
 
 func msaLon(t float64, mn int, sn int) float64 {
@@ -503,16 +496,14 @@ func msaLonT(w float64) float64 {
 	t += (w - msaLon(t, 3, 3)) / v
 	v = mv(t) - ev(t)
 	t += (w - msaLon(t, 20, 10)) / v
-	t += (w - msaLon(t, -1, 60)) / v
-	return t
+	return t + (w-msaLon(t, -1, 60))/v
 }
 
 func saLonT2(w float64) float64 {
 	v := 628.3319653318
 	t := (w - 1.75347 - math.Pi) / v
 	t -= (0.000005297*t*t + 0.0334166*math.Cos(4.669257+628.307585*t) + 0.0002061*math.Cos(2.67823+628.307585*t)*t) / v
-	t += (w - eLon(t, 8) - math.Pi + (20.5+17.2*math.Sin(2.1824-33.75705*t))/SecondPerRad) / v
-	return t
+	return t + (w-eLon(t, 8)-math.Pi+(20.5+17.2*math.Sin(2.1824-33.75705*t))/SecondPerRad)/v
 }
 
 func msaLonT2(w float64) float64 {
@@ -523,8 +514,7 @@ func msaLonT2(w float64) float64 {
 	t2 = t * t
 	l := mLon(t, 20) - (4.8950632 + 628.3319653318*t + 0.000005297*t2 + 0.0334166*math.Cos(4.669257+628.307585*t) + 0.0002061*math.Cos(2.67823+628.307585*t)*t + 0.000349*math.Cos(4.6261+1256.61517*t) - 20.5/SecondPerRad)
 	v = 7771.38 - 914*math.Sin(0.7848+8328.691425*t+0.0001523*t2) - 179*math.Sin(2.543+15542.7543*t) - 160*math.Sin(0.1874+7214.0629*t)
-	t += (w - l) / v
-	return t
+	return t + (w-l)/v
 }
 
 func qiHigh(w float64) float64 {

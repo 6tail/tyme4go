@@ -359,7 +359,7 @@ func (o SolarDay) GetFestival() *SolarFestival {
 // GetPhaseDay 月相第几天
 func (o SolarDay) GetPhaseDay() PhaseDay {
 	month := o.GetLunarDay().GetLunarMonth().Next(1)
-	p := Phase{}.FromIndex(month.GetYear(), month.GetMonth(), 0)
+	p := Phase{}.FromIndex(month.GetYear(), month.GetMonthWithLeap(), 0)
 	d := p.GetSolarDay()
 	for d.IsAfter(o) {
 		p = p.Next(-1)
