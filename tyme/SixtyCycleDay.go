@@ -26,7 +26,7 @@ func (SixtyCycleDay) New(solarDay SolarDay, month SixtyCycleMonth, day SixtyCycl
 
 func (SixtyCycleDay) FromSolarDay(solarDay SolarDay) SixtyCycleDay {
 	solarYear := solarDay.GetYear()
-	springSolarDay := SolarTerm{}.FromIndex(solarYear, 3).GetJulianDay().GetSolarDay()
+	springSolarDay := SolarTerm{}.FromIndex(solarYear, 3).GetSolarDay()
 	lunarDay := solarDay.GetLunarDay()
 	lunarYear := lunarDay.GetLunarMonth().GetLunarYear()
 	if lunarYear.GetYear() == solarYear {
@@ -40,7 +40,7 @@ func (SixtyCycleDay) FromSolarDay(solarDay SolarDay) SixtyCycleDay {
 	}
 	term := solarDay.GetTerm()
 	index := term.GetIndex() - 3
-	if index < 0 && term.GetJulianDay().GetSolarDay().IsAfter(springSolarDay) {
+	if index < 0 && term.GetSolarDay().IsAfter(springSolarDay) {
 		index += 24
 	}
 	y, _ := SixtyCycleYear{}.FromYear(lunarYear.GetYear())
@@ -103,9 +103,9 @@ func (o SixtyCycleDay) GetTwelveStar() TwelveStar {
 func (o SixtyCycleDay) GetNineStar() NineStar {
 	d := o.solarDay
 	dongZhi := SolarTerm{}.FromIndex(d.GetYear(), 0)
-	dongZhiSolar := dongZhi.GetJulianDay().GetSolarDay()
-	xiaZhiSolar := dongZhi.Next(12).GetJulianDay().GetSolarDay()
-	dongZhiSolar2 := dongZhi.Next(24).GetJulianDay().GetSolarDay()
+	dongZhiSolar := dongZhi.GetSolarDay()
+	xiaZhiSolar := dongZhi.Next(12).GetSolarDay()
+	dongZhiSolar2 := dongZhi.Next(24).GetSolarDay()
 	dongZhiIndex := dongZhiSolar.GetLunarDay().GetSixtyCycle().GetIndex()
 	xiaZhiIndex := xiaZhiSolar.GetLunarDay().GetSixtyCycle().GetIndex()
 	dongZhiIndex2 := dongZhiSolar2.GetLunarDay().GetSixtyCycle().GetIndex()
@@ -187,4 +187,13 @@ func (o SixtyCycleDay) GetRecommends() ([]Taboo, error) {
 // GetAvoids 忌
 func (o SixtyCycleDay) GetAvoids() ([]Taboo, error) {
 	return Taboo{}.GetDayAvoids(o.GetMonth(), o.day)
+}
+
+// GetThreePillars 三柱
+func (o SixtyCycleDay) GetThreePillars() ThreePillars {
+	return ThreePillars{
+		year:  o.GetYear(),
+		month: o.GetMonth(),
+		day:   o.GetSixtyCycle(),
+	}
 }

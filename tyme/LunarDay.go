@@ -143,9 +143,9 @@ func (o LunarDay) GetTwelveStar() TwelveStar {
 func (o LunarDay) GetNineStar() NineStar {
 	d := o.GetSolarDay()
 	dongZhi := SolarTerm{}.FromIndex(d.GetYear(), 0)
-	dongZhiSolar := dongZhi.GetJulianDay().GetSolarDay()
-	xiaZhiSolar := dongZhi.Next(12).GetJulianDay().GetSolarDay()
-	dongZhiSolar2 := dongZhi.Next(24).GetJulianDay().GetSolarDay()
+	dongZhiSolar := dongZhi.GetSolarDay()
+	xiaZhiSolar := dongZhi.Next(12).GetSolarDay()
+	dongZhiSolar2 := dongZhi.Next(24).GetSolarDay()
 	dongZhiIndex := dongZhiSolar.GetLunarDay().GetSixtyCycle().GetIndex()
 	xiaZhiIndex := xiaZhiSolar.GetLunarDay().GetSixtyCycle().GetIndex()
 	dongZhiIndex2 := dongZhiSolar2.GetLunarDay().GetSixtyCycle().GetIndex()
@@ -279,4 +279,9 @@ func (o LunarDay) GetAvoids() ([]Taboo, error) {
 // GetMinorRen 小六壬
 func (o LunarDay) GetMinorRen() MinorRen {
 	return o.GetLunarMonth().GetMinorRen().Next(o.day - 1)
+}
+
+// GetThreePillars 三柱
+func (o LunarDay) GetThreePillars() ThreePillars {
+	return o.GetSixtyCycleDay().GetThreePillars()
 }

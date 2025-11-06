@@ -128,3 +128,12 @@ func TestEightChar5(t *testing.T) {
 		t.Errorf("excepted: %v, got: %v", excepted, got)
 	}
 }
+
+func TestEightChar51(t *testing.T) {
+	excepted := "甲戌 癸酉 甲戌 甲戌"
+	st, _ := tyme.SolarTime{}.FromYmdHms(1034, 10, 2, 20, 0, 0)
+	got := st.GetLunarHour().GetEightChar().String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+}

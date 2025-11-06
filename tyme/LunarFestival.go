@@ -76,7 +76,7 @@ func (LunarFestival) FromIndex(year int, index int) (*LunarFestival, error) {
 			return nil, err
 		}
 		solarTerm := SolarTerm{}.FromIndex(year, i)
-		f, err := LunarFestival{}.New(t, solarTerm.GetJulianDay().GetSolarDay().GetLunarDay(), &solarTerm, data)
+		f, err := LunarFestival{}.New(t, solarTerm.GetSolarDay().GetLunarDay(), &solarTerm, data)
 		if err != nil {
 			return nil, err
 		}
@@ -120,7 +120,7 @@ func (LunarFestival) FromYmd(year int, month int, day int) (*LunarFestival, erro
 			return nil, err
 		}
 		solarTerm := SolarTerm{}.FromIndex(year, i)
-		d := solarTerm.GetJulianDay().GetSolarDay().GetLunarDay()
+		d := solarTerm.GetSolarDay().GetLunarDay()
 		if d.GetYear() == year && d.GetMonth() == month && d.GetDay() == day {
 			f, err := LunarFestival{}.New(TERM, d, &solarTerm, data)
 			if err != nil {

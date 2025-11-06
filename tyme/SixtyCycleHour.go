@@ -122,12 +122,7 @@ func (o SixtyCycleHour) GetNineStar() NineStar {
 
 // GetEightChar 八字
 func (o SixtyCycleHour) GetEightChar() EightChar {
-	return EightChar{
-		year:  o.GetYear(),
-		month: o.GetMonth(),
-		day:   o.GetDay(),
-		hour:  o.hour,
-	}
+	return EightChar{}.FromSixtyCycle(o.GetYear(), o.GetMonth(), o.GetDay(), o.hour)
 }
 
 // GetRecommends 宜

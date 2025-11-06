@@ -8,26 +8,14 @@ import (
 // EightChar 八字
 type EightChar struct {
 	AbstractCulture
-	// 年柱
-	year SixtyCycle
-	// 月柱
-	month SixtyCycle
-	// 日柱
-	day SixtyCycle
+	// 三柱
+	threePillars ThreePillars
 	// 时柱
 	hour SixtyCycle
 }
 
 func (EightChar) New(year string, month string, day string, hour string) (*EightChar, error) {
-	y, err := SixtyCycle{}.FromName(year)
-	if err != nil {
-		return nil, err
-	}
-	m, err := SixtyCycle{}.FromName(month)
-	if err != nil {
-		return nil, err
-	}
-	d, err := SixtyCycle{}.FromName(day)
+	t, err := ThreePillars{}.New(year, month, day)
 	if err != nil {
 		return nil, err
 	}
@@ -36,26 +24,32 @@ func (EightChar) New(year string, month string, day string, hour string) (*Eight
 		return nil, err
 	}
 	return &EightChar{
-		year:  *y,
-		month: *m,
-		day:   *d,
-		hour:  *h,
+		threePillars: *t,
+		hour:         *h,
 	}, nil
+}
+
+func (EightChar) FromSixtyCycle(year SixtyCycle, month SixtyCycle, day SixtyCycle, hour SixtyCycle) EightChar {
+	t := ThreePillars{}.FromSixtyCycle(year, month, day)
+	return EightChar{
+		threePillars: t,
+		hour:         hour,
+	}
 }
 
 // GetYear 年柱
 func (o EightChar) GetYear() SixtyCycle {
-	return o.year
+	return o.threePillars.GetYear()
 }
 
 // GetMonth 月柱
 func (o EightChar) GetMonth() SixtyCycle {
-	return o.month
+	return o.threePillars.GetMonth()
 }
 
 // GetDay 日柱
 func (o EightChar) GetDay() SixtyCycle {
-	return o.day
+	return o.threePillars.GetDay()
 }
 
 // GetHour 时柱
@@ -65,19 +59,21 @@ func (o EightChar) GetHour() SixtyCycle {
 
 // GetFetalOrigin 胎元
 func (o EightChar) GetFetalOrigin() SixtyCycle {
-	t, _ := SixtyCycle{}.FromName(o.month.GetHeavenStem().Next(1).GetName() + o.month.GetEarthBranch().Next(3).GetName())
+	m := o.GetMonth()
+	t, _ := SixtyCycle{}.FromName(m.GetHeavenStem().Next(1).GetName() + m.GetEarthBranch().Next(3).GetName())
 	return *t
 }
 
 // GetFetalBreath 胎息
 func (o EightChar) GetFetalBreath() SixtyCycle {
-	t, _ := SixtyCycle{}.FromName(o.day.GetHeavenStem().Next(5).GetName() + EarthBranch{}.FromIndex(13-o.day.GetEarthBranch().GetIndex()).GetName())
+	d := o.GetDay()
+	t, _ := SixtyCycle{}.FromName(d.GetHeavenStem().Next(5).GetName() + EarthBranch{}.FromIndex(13-d.GetEarthBranch().GetIndex()).GetName())
 	return *t
 }
 
 // GetOwnSign 命宫
 func (o EightChar) GetOwnSign() SixtyCycle {
-	m := o.month.GetEarthBranch().GetIndex() - 1
+	m := o.GetMonth().GetEarthBranch().GetIndex() - 1
 	if m < 1 {
 		m += 12
 	}
@@ -91,13 +87,13 @@ func (o EightChar) GetOwnSign() SixtyCycle {
 	} else {
 		offset = 14 - offset
 	}
-	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex((o.year.GetHeavenStem().GetIndex()+1)*2+offset-1).GetName() + EarthBranch{}.FromIndex(offset+1).GetName())
+	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex((o.GetYear().GetHeavenStem().GetIndex()+1)*2+offset-1).GetName() + EarthBranch{}.FromIndex(offset+1).GetName())
 	return *t
 }
 
 // GetBodySign 身宫
 func (o EightChar) GetBodySign() SixtyCycle {
-	offset := o.month.GetEarthBranch().GetIndex() - 1
+	offset := o.GetMonth().GetEarthBranch().GetIndex() - 1
 	if offset < 1 {
 		offset += 12
 	}
@@ -105,17 +101,17 @@ func (o EightChar) GetBodySign() SixtyCycle {
 	if offset > 12 {
 		offset -= 12
 	}
-	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex((o.year.GetHeavenStem().GetIndex()+1)*2+offset-1).GetName() + EarthBranch{}.FromIndex(offset+1).GetName())
+	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex((o.GetYear().GetHeavenStem().GetIndex()+1)*2+offset-1).GetName() + EarthBranch{}.FromIndex(offset+1).GetName())
 	return *t
 }
 
 // Deprecated: Use SixtyCycleDay.GetDuty instead.
 func (o EightChar) GetDuty() Duty {
-	return Duty{}.FromIndex(o.day.GetEarthBranch().GetIndex() - o.month.GetEarthBranch().GetIndex())
+	return Duty{}.FromIndex(o.GetDay().GetEarthBranch().GetIndex() - o.GetMonth().GetEarthBranch().GetIndex())
 }
 
 func (o EightChar) GetName() string {
-	return fmt.Sprintf("%v %v %v %v", o.year, o.month, o.day, o.hour)
+	return fmt.Sprintf("%v %v", o.threePillars, o.hour)
 }
 
 func (o EightChar) String() string {
@@ -129,14 +125,17 @@ func (o EightChar) Equals(target EightChar) bool {
 // GetSolarTimes 公历时刻列表(支持1-9999年)
 func (o EightChar) GetSolarTimes(startYear int, endYear int) []SolarTime {
 	var l []SolarTime
+	year := o.GetYear()
+	month := o.GetMonth()
+	day := o.GetDay()
 	// 月地支距寅月的偏移值
-	m := o.month.GetEarthBranch().Next(-2).GetIndex()
+	m := month.GetEarthBranch().Next(-2).GetIndex()
 	// 月天干要一致
-	if (!HeavenStem{}.FromIndex((o.year.GetHeavenStem().GetIndex()+1)*2 + m).Equals(o.month.GetHeavenStem())) {
+	if (!HeavenStem{}.FromIndex((year.GetHeavenStem().GetIndex()+1)*2 + m).Equals(month.GetHeavenStem())) {
 		return l
 	}
 	// 1年的立春是辛酉，序号57
-	y := o.year.Next(-57).GetIndex() + 1
+	y := year.Next(-57).GetIndex() + 1
 	// 节令偏移值
 	m *= 2
 	// 时辰地支转时刻
@@ -160,7 +159,7 @@ func (o EightChar) GetSolarTimes(startYear int, endYear int) []SolarTime {
 		if solarTime.GetYear() >= startYear {
 			// 日干支和节令干支的偏移值
 			solarDay := solarTime.GetSolarDay()
-			d := o.day.Next(-solarDay.GetLunarDay().GetSixtyCycle().GetIndex()).GetIndex()
+			d := day.Next(-solarDay.GetLunarDay().GetSixtyCycle().GetIndex()).GetIndex()
 			if d > 0 {
 				// 从节令推移天数
 				solarDay = solarDay.Next(d)

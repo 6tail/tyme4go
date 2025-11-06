@@ -11,7 +11,7 @@ type SolarTerm struct {
 	LoopTyme
 	// 年
 	year int
-	// 粗略的儒略日
+	// 儒略日（用于日历，只精确到日中午12:00）
 	cursoryJulianDay float64
 }
 
@@ -68,9 +68,14 @@ func (o SolarTerm) IsQi() bool {
 	return o.index%2 == 0
 }
 
-// GetJulianDay 儒略日
+// GetJulianDay 儒略日（精确到秒）
 func (o SolarTerm) GetJulianDay() JulianDay {
 	return JulianDay{}.FromJulianDay(QiAccurate2(o.cursoryJulianDay) + J2000)
+}
+
+// GetSolarDay 公历日（用于日历）
+func (o SolarTerm) GetSolarDay() SolarDay {
+	return JulianDay{}.FromJulianDay(o.cursoryJulianDay + J2000).GetSolarDay()
 }
 
 // GetYear 年
@@ -78,7 +83,7 @@ func (o SolarTerm) GetYear() int {
 	return o.year
 }
 
-// GetCursoryJulianDay 粗略的儒略日
+// GetCursoryJulianDay 儒略日（用于日历，只精确到日中午12:00）
 func (o SolarTerm) GetCursoryJulianDay() float64 {
 	return o.cursoryJulianDay
 }

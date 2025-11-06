@@ -149,10 +149,10 @@ func (o SolarDay) GetTermDay() SolarTermDay {
 		i = 0
 	}
 	term := SolarTerm{}.FromIndex(y, i)
-	day := term.GetJulianDay().GetSolarDay()
+	day := term.GetSolarDay()
 	for o.IsBefore(day) {
 		term = term.Next(-1)
-		day = term.GetJulianDay().GetSolarDay()
+		day = term.GetSolarDay()
 	}
 	return SolarTermDay{}.New(term, o.Subtract(day))
 }
@@ -189,7 +189,7 @@ func (o SolarDay) GetDogDay() *DogDay {
 	// 夏至
 	xiaZhi := SolarTerm{}.FromIndex(o.GetYear(), 12)
 	// 第1个庚日
-	start := xiaZhi.GetJulianDay().GetSolarDay()
+	start := xiaZhi.GetSolarDay()
 	// 第3个庚日，即初伏第1天
 	start = start.Next(start.GetLunarDay().GetSixtyCycle().GetHeavenStem().StepsTo(6) + 20)
 	days := o.Subtract(start)
@@ -212,7 +212,7 @@ func (o SolarDay) GetDogDay() *DogDay {
 	start = start.Next(10)
 	days = o.Subtract(start)
 	// 立秋
-	if xiaZhi.Next(3).GetJulianDay().GetSolarDay().IsAfter(start) {
+	if xiaZhi.Next(3).GetSolarDay().IsAfter(start) {
 		if days < 10 {
 			d := DogDay{}.New(Dog{}.FromIndex(1), days+10)
 			return &d
@@ -230,9 +230,9 @@ func (o SolarDay) GetDogDay() *DogDay {
 // GetNineDay 数九天
 func (o SolarDay) GetNineDay() *NineDay {
 	year := o.GetYear()
-	start := SolarTerm{}.FromIndex(year+1, 0).GetJulianDay().GetSolarDay()
+	start := SolarTerm{}.FromIndex(year+1, 0).GetSolarDay()
 	if o.IsBefore(start) {
-		start = SolarTerm{}.FromIndex(year, 0).GetJulianDay().GetSolarDay()
+		start = SolarTerm{}.FromIndex(year, 0).GetSolarDay()
 	}
 	end := start.Next(81)
 	if o.IsBefore(start) || !o.IsBefore(end) {
@@ -250,7 +250,7 @@ func (o SolarDay) GetHideHeavenStemDay() HideHeavenStemDay {
 	if term.IsQi() {
 		term = term.Next(-1)
 	}
-	dayIndex := o.Subtract(term.GetJulianDay().GetSolarDay())
+	dayIndex := o.Subtract(term.GetSolarDay())
 	startIndex := (term.GetIndex() - 1) * 3
 	data := "93705542220504xx1513904541632524533533105544806564xx7573304542018584xx95"[startIndex : startIndex+6]
 	days := 0
@@ -285,12 +285,12 @@ func (o SolarDay) GetHideHeavenStemDay() HideHeavenStemDay {
 func (o SolarDay) GetPlumRainDay() *PlumRainDay {
 	// 芒种
 	grainInEar := SolarTerm{}.FromIndex(o.GetYear(), 11)
-	start := grainInEar.GetJulianDay().GetSolarDay()
+	start := grainInEar.GetSolarDay()
 	// 芒种后的第1个丙日
 	start = start.Next(start.GetLunarDay().GetSixtyCycle().GetHeavenStem().StepsTo(2))
 
 	// 小暑
-	end := grainInEar.Next(2).GetJulianDay().GetSolarDay()
+	end := grainInEar.Next(2).GetSolarDay()
 	// 小暑后的第1个未日
 	end = end.Next(end.GetLunarDay().GetSixtyCycle().GetEarthBranch().StepsTo(7))
 

@@ -7,10 +7,5 @@ type LunarSect2EightCharProvider struct {
 
 func (o LunarSect2EightCharProvider) GetEightChar(hour LunarHour) EightChar {
 	h := hour.GetSixtyCycleHour()
-	return EightChar{
-		year:  h.GetYear(),
-		month: h.GetMonth(),
-		day:   hour.GetLunarDay().GetSixtyCycle(),
-		hour:  h.GetSixtyCycle(),
-	}
+	return EightChar{}.FromSixtyCycle(h.GetYear(), h.GetMonth(), hour.GetLunarDay().GetSixtyCycle(), h.GetSixtyCycle())
 }

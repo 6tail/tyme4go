@@ -19,6 +19,12 @@ func TestSolarTerm0(t *testing.T) {
 	if excepted != got {
 		t.Errorf("excepted: %v, got: %v", excepted, got)
 	}
+
+	excepted = "2022年12月22日"
+	got = d.GetSolarDay().String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
 }
 
 func TestSolarTerm1(t *testing.T) {
@@ -28,12 +34,24 @@ func TestSolarTerm1(t *testing.T) {
 	if excepted != got {
 		t.Errorf("excepted: %v, got: %v", excepted, got)
 	}
+
+	excepted = "2022年12月22日"
+	got = d.GetSolarDay().String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
 }
 
 func TestSolarTerm2(t *testing.T) {
 	d, _ := tyme.SolarTerm{}.FromName(2025, "惊蛰")
 	excepted := "2025年3月5日 16:07:18"
 	got := d.GetJulianDay().GetSolarTime().String()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
+
+	excepted = "2025年3月5日"
+	got = d.GetSolarDay().String()
 	if excepted != got {
 		t.Errorf("excepted: %v, got: %v", excepted, got)
 	}

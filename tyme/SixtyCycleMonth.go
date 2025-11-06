@@ -67,7 +67,7 @@ func (o SixtyCycleMonth) GetIndexInYear() int {
 }
 
 func (o SixtyCycleMonth) GetFirstDay() SixtyCycleDay {
-	return SixtyCycleDay{}.FromSolarDay(SolarTerm{}.FromIndex(o.year.GetYear(), 3+o.GetIndexInYear()*2).GetJulianDay().GetSolarDay())
+	return SixtyCycleDay{}.FromSolarDay(SolarTerm{}.FromIndex(o.year.GetYear(), 3+o.GetIndexInYear()*2).GetSolarDay())
 }
 
 // GetDays 本月的干支日列表
