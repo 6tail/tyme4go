@@ -14,9 +14,14 @@ var onceLunarYear sync.Once
 
 // LunarYear 农历年
 type LunarYear struct {
-	AbstractTyme
-	// 年
-	year int
+	YearUnit
+}
+
+func (LunarYear) Validate(year int) error {
+	if year < -1 || year > 9999 {
+		return fmt.Errorf(fmt.Sprintf("illegal lunar year: %d", year))
+	}
+	return nil
 }
 
 func (LunarYear) FromYear(year int) (*LunarYear, error) {
@@ -55,17 +60,15 @@ func (LunarYear) FromYear(year int) (*LunarYear, error) {
 			LunarYearLeap = append(LunarYearLeap, l)
 		}
 	})
-	if year < -1 || year > 9999 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal lunar year: %d", year))
+	err := LunarYear{}.Validate(year)
+	if err != nil {
+		return nil, err
 	}
 	return &LunarYear{
-		year: year,
+		YearUnit{
+			year: year,
+		},
 	}, nil
-}
-
-// GetYear 年
-func (o LunarYear) GetYear() int {
-	return o.year
 }
 
 // GetDayCount 天数

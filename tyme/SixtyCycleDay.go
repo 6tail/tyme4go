@@ -2,7 +2,6 @@ package tyme
 
 import (
 	"fmt"
-	"math"
 )
 
 // SixtyCycleDay 干支日（立春换年，节令换月）
@@ -25,30 +24,22 @@ func (SixtyCycleDay) New(solarDay SolarDay, month SixtyCycleMonth, day SixtyCycl
 }
 
 func (SixtyCycleDay) FromSolarDay(solarDay SolarDay) SixtyCycleDay {
-	solarYear := solarDay.GetYear()
-	springSolarDay := SolarTerm{}.FromIndex(solarYear, 3).GetSolarDay()
-	lunarDay := solarDay.GetLunarDay()
-	lunarYear := lunarDay.GetLunarMonth().GetLunarYear()
-	if lunarYear.GetYear() == solarYear {
-		if solarDay.IsBefore(springSolarDay) {
-			lunarYear = lunarYear.Next(-1)
-		}
-	} else if lunarYear.GetYear() < solarYear {
-		if !solarDay.IsBefore(springSolarDay) {
-			lunarYear = lunarYear.Next(1)
-		}
-	}
 	term := solarDay.GetTerm()
-	index := term.GetIndex() - 3
-	if index < 0 && term.GetSolarDay().IsAfter(springSolarDay) {
-		index += 24
+	index := term.GetIndex()
+	offset := -1
+	if index < 3 {
+		if index == 0 {
+			offset = -2
+		}
+	} else {
+		offset = (index - 3) / 2
 	}
-	y, _ := SixtyCycleYear{}.FromYear(lunarYear.GetYear())
-	m, _ := LunarMonth{}.FromYm(solarYear, 1)
+	y, _ := SixtyCycleYear{}.FromYear(term.GetYear())
+	d, _ := SolarDay{}.FromYmd(2000, 1, 7)
 	return SixtyCycleDay{
 		solarDay: solarDay,
-		month:    SixtyCycleMonth{}.New(*y, m.GetSixtyCycle().Next(int(math.Floor(float64(index)*0.5)))),
-		day:      lunarDay.GetSixtyCycle(),
+		month:    y.GetFirstMonth().Next(offset),
+		day:      SixtyCycle{}.FromIndex(solarDay.Subtract(*d)),
 	}
 }
 

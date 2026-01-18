@@ -8,49 +8,45 @@ var LunarDayNames = []string{"初一", "初二", "初三", "初四", "初五", "
 
 // LunarDay 农历日
 type LunarDay struct {
-	AbstractTyme
-	// 农历月
-	month LunarMonth
-	// 日
-	day int
-	// 公历日（第一次使用时才会初始化）
-	solarDay *SolarDay
-	// 干支日（第一次使用时才会初始化）
-	sixtyCycleDay *SixtyCycleDay
+	DayUnit
+}
+
+func (LunarDay) Validate(year int, month int, day int) error {
+	if day < 1 {
+		return fmt.Errorf(fmt.Sprintf("illegal lunar day %d", day))
+	}
+	m, err := LunarMonth{}.FromYm(year, month)
+	if err != nil {
+		return err
+	}
+	if day > m.GetDayCount() {
+		return fmt.Errorf(fmt.Sprintf("illegal day %d in %v", day, m))
+	}
+	return nil
 }
 
 func (LunarDay) FromYmd(year int, month int, day int) (*LunarDay, error) {
-	m, err := LunarMonth{}.FromYm(year, month)
+	err := LunarDay{}.Validate(year, month, day)
 	if err != nil {
 		return nil, err
 	}
-	if day < 1 || day > m.GetDayCount() {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal day %d in %v", day, m))
-	}
 	return &LunarDay{
-		month: *m,
-		day:   day,
+		DayUnit{
+			MonthUnit{
+				YearUnit{
+					year: year,
+				},
+				month,
+			},
+			day,
+		},
 	}, nil
 }
 
 // GetLunarMonth 农历月
 func (o LunarDay) GetLunarMonth() LunarMonth {
-	return o.month
-}
-
-// GetYear 年
-func (o LunarDay) GetYear() int {
-	return o.month.GetYear()
-}
-
-// GetMonth 月
-func (o LunarDay) GetMonth() int {
-	return o.month.GetMonthWithLeap()
-}
-
-// GetDay 日
-func (o LunarDay) GetDay() int {
-	return o.day
+	m, _ := LunarMonth{}.FromYm(o.year, o.month)
+	return *m
 }
 
 // GetWeek 星期
@@ -63,7 +59,7 @@ func (o LunarDay) GetName() string {
 }
 
 func (o LunarDay) String() string {
-	return fmt.Sprintf("%v%v", o.month, o.GetName())
+	return fmt.Sprintf("%v%v", o.GetLunarMonth(), o.GetName())
 }
 
 func (o LunarDay) Next(n int) LunarDay {
@@ -72,12 +68,12 @@ func (o LunarDay) Next(n int) LunarDay {
 
 // IsBefore 是否在指定农历日之前
 func (o LunarDay) IsBefore(target LunarDay) bool {
-	aYear := o.GetYear()
+	aYear := o.year
 	bYear := target.GetYear()
 	if aYear != bYear {
 		return aYear < bYear
 	}
-	aMonth := o.GetMonth()
+	aMonth := o.month
 	bMonth := target.GetMonth()
 	if aMonth != bMonth {
 		if aMonth < 0 {
@@ -93,12 +89,12 @@ func (o LunarDay) IsBefore(target LunarDay) bool {
 
 // IsAfter 是否在指定农历日之后
 func (o LunarDay) IsAfter(target LunarDay) bool {
-	aYear := o.GetYear()
+	aYear := o.year
 	bYear := target.GetYear()
 	if aYear != bYear {
 		return aYear > bYear
 	}
-	aMonth := o.GetMonth()
+	aMonth := o.month
 	bMonth := target.GetMonth()
 	if aMonth != bMonth {
 		if aMonth < 0 {
@@ -124,7 +120,7 @@ func (o LunarDay) GetMonthSixtyCycle() SixtyCycle {
 
 // GetSixtyCycle 干支
 func (o LunarDay) GetSixtyCycle() SixtyCycle {
-	offset := int(o.month.GetFirstJulianDay().Next(o.day - 12).GetDay())
+	offset := int(o.GetLunarMonth().GetFirstJulianDay().Next(o.day - 12).GetDay())
 	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex(offset).GetName() + EarthBranch{}.FromIndex(offset).GetName())
 	return *t
 }
@@ -142,7 +138,7 @@ func (o LunarDay) GetTwelveStar() TwelveStar {
 // GetNineStar 九星
 func (o LunarDay) GetNineStar() NineStar {
 	d := o.GetSolarDay()
-	dongZhi := SolarTerm{}.FromIndex(d.GetYear(), 0)
+	dongZhi := SolarTerm{}.FromIndex(d.year, 0)
 	dongZhiSolar := dongZhi.GetSolarDay()
 	xiaZhiSolar := dongZhi.Next(12).GetSolarDay()
 	dongZhiSolar2 := dongZhi.Next(24).GetSolarDay()
@@ -183,7 +179,7 @@ func (o LunarDay) GetJupiterDirection() Direction {
 	if index%12 < 6 {
 		return Element{}.FromIndex(index / 12).GetDirection()
 	}
-	return o.month.GetLunarYear().GetJupiterDirection()
+	return o.GetLunarMonth().GetLunarYear().GetJupiterDirection()
 }
 
 // GetFetusDay 逐日胎神
@@ -194,7 +190,7 @@ func (o LunarDay) GetFetusDay() FetusDay {
 // GetPhaseDay 月相第几天
 func (o LunarDay) GetPhaseDay() PhaseDay {
 	today := o.GetSolarDay()
-	m := o.month.Next(1)
+	m := o.GetLunarMonth().Next(1)
 	p := Phase{}.FromIndex(m.GetYear(), m.GetMonthWithLeap(), 0)
 	d := p.GetSolarDay()
 	for d.IsAfter(today) {
@@ -211,25 +207,21 @@ func (o LunarDay) GetPhase() Phase {
 
 // GetSixStar 六曜
 func (o LunarDay) GetSixStar() SixStar {
-	return SixStar{}.FromIndex((o.month.GetMonth() + o.day - 2) % 6)
+	m := o.month
+	if m < 0 {
+		m = -m
+	}
+	return SixStar{}.FromIndex((m + o.day - 2) % 6)
 }
 
 // GetSolarDay 公历日
 func (o LunarDay) GetSolarDay() SolarDay {
-	if o.solarDay == nil {
-		d := o.month.GetFirstJulianDay().Next(o.day - 1).GetSolarDay()
-		o.solarDay = &d
-	}
-	return *o.solarDay
+	return o.GetLunarMonth().GetFirstJulianDay().Next(o.day - 1).GetSolarDay()
 }
 
 // GetSixtyCycleDay 干支日
 func (o LunarDay) GetSixtyCycleDay() SixtyCycleDay {
-	if o.sixtyCycleDay == nil {
-		d := o.GetSolarDay().GetSixtyCycleDay()
-		o.sixtyCycleDay = &d
-	}
-	return *o.sixtyCycleDay
+	return o.GetSolarDay().GetSixtyCycleDay()
 }
 
 // GetTwentyEightStar 二十八宿
@@ -239,7 +231,7 @@ func (o LunarDay) GetTwentyEightStar() TwentyEightStar {
 
 // GetFestival 农历传统节日，如果当天不是农历传统节日，返回nil
 func (o LunarDay) GetFestival() *LunarFestival {
-	f, _ := LunarFestival{}.FromYmd(o.GetYear(), o.GetMonth(), o.day)
+	f, _ := LunarFestival{}.FromYmd(o.year, o.month, o.day)
 	return f
 }
 
@@ -250,12 +242,10 @@ func (o LunarDay) Equals(target LunarDay) bool {
 // GetHours 当天的农历时辰列表
 func (o LunarDay) GetHours() []LunarHour {
 	var l []LunarHour
-	y := o.GetYear()
-	m := o.GetMonth()
-	t, _ := LunarHour{}.FromYmdHms(y, m, o.day, 0, 0, 0)
+	t, _ := LunarHour{}.FromYmdHms(o.year, o.month, o.day, 0, 0, 0)
 	l = append(l, *t)
 	for i := 0; i < 24; i += 2 {
-		t, _ = LunarHour{}.FromYmdHms(y, m, o.day, i+1, 0, 0)
+		t, _ = LunarHour{}.FromYmdHms(o.year, o.month, o.day, i+1, 0, 0)
 		l = append(l, *t)
 	}
 	return l

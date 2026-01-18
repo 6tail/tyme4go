@@ -24,6 +24,9 @@ Tyme是一个非常强大的日历工具库，可以看作 [Lunar](https://6tail
            
           // 农历丙寅年四月廿一
           fmt.Println(solarDay.GetLunarDay())
+
+          // 第十七饶迥火虎年四月廿一
+          fmt.Println(solarDay.GetRabByungDay())
         }
     }
 

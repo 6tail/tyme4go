@@ -8,59 +8,47 @@ var LunarWeekNames = []string{"第一周", "第二周", "第三周", "第四周"
 
 // LunarWeek 农历周
 type LunarWeek struct {
-	AbstractTyme
-	// 农历月
-	month LunarMonth
-	// 索引，0-5
-	index int
-	// 起始星期
-	start Week
+	WeekUnit
 }
 
-func (LunarWeek) FromYm(year int, month int, index int, start int) (*LunarWeek, error) {
-	if index < 0 || index > 5 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal lunar week index: %d", index))
-	}
-	if start < 0 || start > 6 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal lunar week start: %d", start))
+func (LunarWeek) Validate(year int, month int, index int, start int) error {
+	err := WeekUnit{}.Validate(year, month, index, start)
+	if err != nil {
+		return err
 	}
 	m, err := LunarMonth{}.FromYm(year, month)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if index >= m.GetWeekCount(start) {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal lunar week index: %d in month: %v", index, m))
+		return fmt.Errorf(fmt.Sprintf("illegal lunar week index: %d in month: %v", index, m))
+	}
+	return nil
+}
+
+func (LunarWeek) FromYm(year int, month int, index int, start int) (*LunarWeek, error) {
+	err := LunarWeek{}.Validate(year, month, index, start)
+	if err != nil {
+		return nil, err
 	}
 	return &LunarWeek{
-		month: *m,
-		index: index,
-		start: Week{}.FromIndex(start),
+		WeekUnit{
+			MonthUnit{
+				YearUnit{
+					year: year,
+				},
+				month,
+			},
+			index,
+			start,
+		},
 	}, nil
 }
 
 // GetLunarMonth 农历月
 func (o LunarWeek) GetLunarMonth() LunarMonth {
-	return o.month
-}
-
-// GetYear 年
-func (o LunarWeek) GetYear() int {
-	return o.month.GetYear()
-}
-
-// GetMonth 月
-func (o LunarWeek) GetMonth() int {
-	return o.month.GetMonthWithLeap()
-}
-
-// GetIndex 周索引(0-5)
-func (o LunarWeek) GetIndex() int {
-	return o.index
-}
-
-// GetStart 起始星期
-func (o LunarWeek) GetStart() Week {
-	return o.start
+	m, _ := LunarMonth{}.FromYm(o.year, o.month)
+	return *m
 }
 
 func (o LunarWeek) GetName() string {
@@ -68,43 +56,40 @@ func (o LunarWeek) GetName() string {
 }
 
 func (o LunarWeek) String() string {
-	return fmt.Sprintf("%v%v", o.month, o.GetName())
+	return fmt.Sprintf("%v%v", o.GetLunarMonth(), o.GetName())
 }
 
 // GetFirstDay 本周第1天
 func (o LunarWeek) GetFirstDay() LunarDay {
-	firstDay, _ := LunarDay{}.FromYmd(o.GetYear(), o.GetMonth(), 1)
-	return firstDay.Next(o.index*7 - o.IndexOf(firstDay.GetWeek().GetIndex()-o.start.GetIndex(), 7))
+	firstDay, _ := LunarDay{}.FromYmd(o.year, o.month, 1)
+	return firstDay.Next(o.index*7 - o.IndexOf(firstDay.GetWeek().GetIndex()-o.start, 7))
 }
 
 func (o LunarWeek) Next(n int) LunarWeek {
-	startIndex := o.start.GetIndex()
 	d := o.index
-	m := o.month
+	m := o.GetLunarMonth()
 	if n > 0 {
 		d += n
-		weekCount := m.GetWeekCount(startIndex)
+		weekCount := m.GetWeekCount(o.start)
 		for d >= weekCount {
 			d -= weekCount
 			m = m.Next(1)
-			day, _ := LunarDay{}.FromYmd(m.GetYear(), m.GetMonthWithLeap(), 1)
-			if !day.GetWeek().Equals(o.start) {
+			if m.GetFirstDay().GetWeek().index != o.start {
 				d += 1
 			}
-			weekCount = m.GetWeekCount(startIndex)
+			weekCount = m.GetWeekCount(o.start)
 		}
 	} else if n < 0 {
 		d += n
 		for d < 0 {
-			day, _ := LunarDay{}.FromYmd(m.GetYear(), m.GetMonthWithLeap(), 1)
-			if !day.GetWeek().Equals(o.start) {
+			if m.GetFirstDay().GetWeek().index != o.start {
 				d -= 1
 			}
 			m = m.Next(-1)
-			d += m.GetWeekCount(startIndex)
+			d += m.GetWeekCount(o.start)
 		}
 	}
-	t, _ := LunarWeek{}.FromYm(m.GetYear(), m.GetMonthWithLeap(), d, startIndex)
+	t, _ := LunarWeek{}.FromYm(m.GetYear(), m.GetMonthWithLeap(), d, o.start)
 	return *t
 }
 

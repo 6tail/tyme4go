@@ -6,72 +6,44 @@ import (
 
 // SolarTime 公历时刻
 type SolarTime struct {
-	AbstractTyme
-	// 公历日
-	day SolarDay
-	// 时
-	hour int
-	// 分
-	minute int
-	// 秒
-	second int
+	SecondUnit
+}
+
+func (SolarTime) Validate(year int, month int, day int, hour int, minute int, second int) error {
+	err := SecondUnit{}.Validate(year, month, day, hour, minute, second)
+	if err != nil {
+		return err
+	}
+	return SolarDay{}.Validate(year, month, day)
 }
 
 func (SolarTime) FromYmdHms(year int, month int, day int, hour int, minute int, second int) (*SolarTime, error) {
-	if hour < 0 || hour > 23 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal hour: %d", hour))
-	}
-	if minute < 0 || minute > 59 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal minute: %d", minute))
-	}
-	if second < 0 || second > 59 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal second: %d", second))
-	}
-	d, err := SolarDay{}.FromYmd(year, month, day)
+	err := SolarTime{}.Validate(year, month, day, hour, minute, second)
 	if err != nil {
 		return nil, err
 	}
 	return &SolarTime{
-		day:    *d,
-		hour:   hour,
-		minute: minute,
-		second: second,
+		SecondUnit{
+			DayUnit{
+				MonthUnit{
+					YearUnit{
+						year: year,
+					},
+					month,
+				},
+				day,
+			},
+			hour,
+			minute,
+			second,
+		},
 	}, nil
 }
 
 // GetSolarDay 公历日
 func (o SolarTime) GetSolarDay() SolarDay {
-	return o.day
-}
-
-// GetYear 年
-func (o SolarTime) GetYear() int {
-	return o.day.GetYear()
-}
-
-// GetMonth 月
-func (o SolarTime) GetMonth() int {
-	return o.day.GetMonth()
-}
-
-// GetDay 日
-func (o SolarTime) GetDay() int {
-	return o.day.GetDay()
-}
-
-// GetHour 时
-func (o SolarTime) GetHour() int {
-	return o.hour
-}
-
-// GetMinute 分
-func (o SolarTime) GetMinute() int {
-	return o.minute
-}
-
-// GetSecond 秒
-func (o SolarTime) GetSecond() int {
-	return o.second
+	d, _ := SolarDay{}.FromYmd(o.year, o.month, o.day)
+	return *d
 }
 
 func (o SolarTime) GetName() string {
@@ -79,12 +51,12 @@ func (o SolarTime) GetName() string {
 }
 
 func (o SolarTime) String() string {
-	return fmt.Sprintf("%v %v", o.day, o.GetName())
+	return fmt.Sprintf("%v %v", o.GetSolarDay(), o.GetName())
 }
 
 func (o SolarTime) Next(n int) SolarTime {
 	if n == 0 {
-		t, _ := SolarTime{}.FromYmdHms(o.GetYear(), o.GetMonth(), o.GetDay(), o.hour, o.minute, o.second)
+		t, _ := SolarTime{}.FromYmdHms(o.year, o.month, o.day, o.hour, o.minute, o.second)
 		return *t
 	}
 	ts := o.second + n
@@ -107,44 +79,48 @@ func (o SolarTime) Next(n int) SolarTime {
 		td -= 1
 	}
 
-	d := o.day.Next(td)
+	d := o.GetSolarDay().Next(td)
 	t, _ := SolarTime{}.FromYmdHms(d.GetYear(), d.GetMonth(), d.GetDay(), th, tm, ts)
 	return *t
 }
 
 // IsBefore 是否在指定公历时刻之前
 func (o SolarTime) IsBefore(target SolarTime) bool {
-	if !o.day.Equals(target.GetSolarDay()) {
-		return o.day.IsBefore(target.GetSolarDay())
+	aDay := o.GetSolarDay()
+	bDay := target.GetSolarDay()
+	if !aDay.Equals(bDay) {
+		return aDay.IsBefore(bDay)
 	}
-	if o.hour != target.GetHour() {
-		return o.hour < target.GetHour()
+	if o.hour != target.hour {
+		return o.hour < target.hour
 	}
-	if o.minute != target.GetMinute() {
-		return o.minute < target.GetMinute()
+	if o.minute != target.minute {
+		return o.minute < target.minute
 	}
-	return o.second < target.GetSecond()
+	return o.second < target.second
 }
 
 // IsAfter 是否在指定公历时刻之后
 func (o SolarTime) IsAfter(target SolarTime) bool {
-	if !o.day.Equals(target.GetSolarDay()) {
-		return o.day.IsAfter(target.GetSolarDay())
+	aDay := o.GetSolarDay()
+	bDay := target.GetSolarDay()
+	if !aDay.Equals(bDay) {
+		return aDay.IsAfter(bDay)
 	}
-	if o.hour != target.GetHour() {
-		return o.hour > target.GetHour()
+	if o.hour != target.hour {
+		return o.hour > target.hour
 	}
-	if o.minute != target.GetMinute() {
-		return o.minute > target.GetMinute()
+	if o.minute != target.minute {
+		return o.minute > target.minute
 	}
-	return o.second > target.GetSecond()
+	return o.second > target.second
 }
 
 // Subtract 公历时刻相减，获得相差秒数
 func (o SolarTime) Subtract(target SolarTime) int {
-	days := o.day.Subtract(target.GetSolarDay())
+	days := o.GetSolarDay().Subtract(target.GetSolarDay())
 	cs := o.hour*3600 + o.minute*60 + o.second
-	ts := target.GetHour()*3600 + target.GetMinute()*60 + target.GetSecond()
+	ts := target.hour*3600 + target.minute*60 + target.second
 	seconds := cs - ts
 	if seconds < 0 {
 		seconds += 86400
@@ -156,12 +132,12 @@ func (o SolarTime) Subtract(target SolarTime) int {
 
 // GetJulianDay 儒略日
 func (o SolarTime) GetJulianDay() JulianDay {
-	return JulianDay{}.FromYmdHms(o.GetYear(), o.GetMonth(), o.GetDay(), o.hour, o.minute, o.second)
+	return JulianDay{}.FromYmdHms(o.year, o.month, o.day, o.hour, o.minute, o.second)
 }
 
 // GetLunarHour 农历时辰
 func (o SolarTime) GetLunarHour() LunarHour {
-	d := o.day.GetLunarDay()
+	d := o.GetSolarDay().GetLunarDay()
 	h, _ := LunarHour{}.FromYmdHms(d.GetYear(), d.GetMonth(), d.GetDay(), o.hour, o.minute, o.second)
 	return *h
 }

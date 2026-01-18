@@ -1,8 +1,9 @@
 package test
 
 import (
-	"github.com/6tail/tyme4go/tyme"
 	"testing"
+
+	"github.com/6tail/tyme4go/tyme"
 )
 
 // TestEcliptic0 黄道黑道十二神测试

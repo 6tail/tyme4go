@@ -10,52 +10,51 @@ var SolarDayNames = []string{"1日", "2日", "3日", "4日", "5日", "6日", "7�
 
 // SolarDay 公历日
 type SolarDay struct {
-	AbstractTyme
-	// 公历月
-	month SolarMonth
-	// 日
-	day int
+	DayUnit
 }
 
-func (SolarDay) FromYmd(year int, month int, day int) (*SolarDay, error) {
+func (SolarDay) Validate(year int, month int, day int) error {
 	if day < 1 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
-	}
-	m, err := SolarMonth{}.FromYm(year, month)
-	if err != nil {
-		return nil, err
+		return fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
 	}
 	if 1582 == year && 10 == month {
 		if (day > 4 && day < 15) || day > 31 {
-			return nil, fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
+			return fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
 		}
-	} else if day > m.GetDayCount() {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
+	} else {
+		m, err := SolarMonth{}.FromYm(year, month)
+		if err != nil {
+			return err
+		}
+		if day > m.GetDayCount() {
+			return fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
+		}
+	}
+	return nil
+}
+
+func (SolarDay) FromYmd(year int, month int, day int) (*SolarDay, error) {
+	err := SolarDay{}.Validate(year, month, day)
+	if err != nil {
+		return nil, err
 	}
 	return &SolarDay{
-		month: *m,
-		day:   day,
+		DayUnit{
+			MonthUnit{
+				YearUnit{
+					year: year,
+				},
+				month,
+			},
+			day,
+		},
 	}, nil
 }
 
 // GetSolarMonth 公历月
 func (o SolarDay) GetSolarMonth() SolarMonth {
-	return o.month
-}
-
-// GetYear 年
-func (o SolarDay) GetYear() int {
-	return o.month.GetYear()
-}
-
-// GetMonth 月
-func (o SolarDay) GetMonth() int {
-	return o.month.GetMonth()
-}
-
-// GetDay 日
-func (o SolarDay) GetDay() int {
-	return o.day
+	m, _ := SolarMonth{}.FromYm(o.year, o.month)
+	return *m
 }
 
 // GetWeek 星期
@@ -98,7 +97,7 @@ func (o SolarDay) GetName() string {
 }
 
 func (o SolarDay) String() string {
-	return fmt.Sprintf("%v%v", o.month, o.GetName())
+	return fmt.Sprintf("%v%v", o.GetSolarMonth(), o.GetName())
 }
 
 func (o SolarDay) Next(n int) SolarDay {
@@ -107,32 +106,24 @@ func (o SolarDay) Next(n int) SolarDay {
 
 // IsBefore 是否在指定公历日之前
 func (o SolarDay) IsBefore(target SolarDay) bool {
-	aYear := o.GetYear()
-	bYear := target.GetYear()
-	if aYear != bYear {
-		return aYear < bYear
+	if o.year != target.year {
+		return o.year < target.year
 	}
-	aMonth := o.GetMonth()
-	bMonth := target.GetMonth()
-	if aMonth != bMonth {
-		return aMonth < bMonth
+	if o.month != target.month {
+		return o.month < target.month
 	}
-	return o.day < target.GetDay()
+	return o.day < target.day
 }
 
 // IsAfter 是否在指定公历日之后
 func (o SolarDay) IsAfter(target SolarDay) bool {
-	aYear := o.GetYear()
-	bYear := target.GetYear()
-	if aYear != bYear {
-		return aYear > bYear
+	if o.year != target.year {
+		return o.year > target.year
 	}
-	aMonth := o.GetMonth()
-	bMonth := target.GetMonth()
-	if aMonth != bMonth {
-		return aMonth > bMonth
+	if o.month != target.month {
+		return o.month > target.month
 	}
-	return o.day > target.GetDay()
+	return o.day > target.day
 }
 
 // GetTerm 节气
@@ -142,13 +133,13 @@ func (o SolarDay) GetTerm() SolarTerm {
 
 // GetTermDay 节气第几天
 func (o SolarDay) GetTermDay() SolarTermDay {
-	y := o.GetYear()
-	i := o.GetMonth() * 2
+	y := o.year
+	i := o.month * 2
 	if i == 24 {
 		y += 1
 		i = 0
 	}
-	term := SolarTerm{}.FromIndex(y, i)
+	term := SolarTerm{}.FromIndex(y, i+1)
 	day := term.GetSolarDay()
 	for o.IsBefore(day) {
 		term = term.Next(-1)
@@ -160,10 +151,8 @@ func (o SolarDay) GetTermDay() SolarTermDay {
 // GetSolarWeek 公历周
 // 参数 start 起始星期，1234560分别代表星期一至星期天
 func (o SolarDay) GetSolarWeek(start int) SolarWeek {
-	y := o.GetYear()
-	m := o.GetMonth()
-	d, _ := SolarDay{}.FromYmd(y, m, 1)
-	w, _ := SolarWeek{}.FromYm(y, m, int(math.Ceil(float64(o.day+d.GetWeek().Next(-start).GetIndex())/7))-1, start)
+	d, _ := SolarDay{}.FromYmd(o.year, o.month, 1)
+	w, _ := SolarWeek{}.FromYm(o.year, o.month, int(math.Ceil(float64(o.day+d.GetWeek().Next(-start).GetIndex())/7))-1, start)
 	return *w
 }
 
@@ -187,7 +176,7 @@ func (o SolarDay) GetPhenology() Phenology {
 // GetDogDay 三伏天
 func (o SolarDay) GetDogDay() *DogDay {
 	// 夏至
-	xiaZhi := SolarTerm{}.FromIndex(o.GetYear(), 12)
+	xiaZhi := SolarTerm{}.FromIndex(o.year, 12)
 	// 第1个庚日
 	start := xiaZhi.GetSolarDay()
 	// 第3个庚日，即初伏第1天
@@ -229,10 +218,9 @@ func (o SolarDay) GetDogDay() *DogDay {
 
 // GetNineDay 数九天
 func (o SolarDay) GetNineDay() *NineDay {
-	year := o.GetYear()
-	start := SolarTerm{}.FromIndex(year+1, 0).GetSolarDay()
+	start := SolarTerm{}.FromIndex(o.year+1, 0).GetSolarDay()
 	if o.IsBefore(start) {
-		start = SolarTerm{}.FromIndex(year, 0).GetSolarDay()
+		start = SolarTerm{}.FromIndex(o.year, 0).GetSolarDay()
 	}
 	end := start.Next(81)
 	if o.IsBefore(start) || !o.IsBefore(end) {
@@ -284,7 +272,7 @@ func (o SolarDay) GetHideHeavenStemDay() HideHeavenStemDay {
 // GetPlumRainDay 梅雨天（芒种后的第1个丙日入梅，小暑后的第1个未日出梅）
 func (o SolarDay) GetPlumRainDay() *PlumRainDay {
 	// 芒种
-	grainInEar := SolarTerm{}.FromIndex(o.GetYear(), 11)
+	grainInEar := SolarTerm{}.FromIndex(o.year, 11)
 	start := grainInEar.GetSolarDay()
 	// 芒种后的第1个丙日
 	start = start.Next(start.GetLunarDay().GetSixtyCycle().GetHeavenStem().StepsTo(2))
@@ -307,7 +295,7 @@ func (o SolarDay) GetPlumRainDay() *PlumRainDay {
 
 // GetIndexInYear 位于当年的索引
 func (o SolarDay) GetIndexInYear() int {
-	d, _ := SolarDay{}.FromYmd(o.GetYear(), 1, 1)
+	d, _ := SolarDay{}.FromYmd(o.year, 1, 1)
 	return o.Subtract(*d)
 }
 
@@ -318,12 +306,12 @@ func (o SolarDay) Subtract(target SolarDay) int {
 
 // GetJulianDay 儒略日
 func (o SolarDay) GetJulianDay() JulianDay {
-	return JulianDay{}.FromYmdHms(o.GetYear(), o.GetMonth(), o.day, 0, 0, 0)
+	return JulianDay{}.FromYmdHms(o.year, o.month, o.day, 0, 0, 0)
 }
 
 // GetLunarDay 农历日
 func (o SolarDay) GetLunarDay() LunarDay {
-	t, _ := LunarMonth{}.FromYm(o.GetYear(), o.GetMonth())
+	t, _ := LunarMonth{}.FromYm(o.year, o.month)
 	m := *t
 	days := o.Subtract(m.GetFirstJulianDay().GetSolarDay())
 	for days < 0 {
@@ -346,13 +334,13 @@ func (o SolarDay) GetRabByungDay() (*RabByungDay, error) {
 
 // GetLegalHoliday 法定假日，如果当天不是法定假日，返回nil
 func (o SolarDay) GetLegalHoliday() *LegalHoliday {
-	f, _ := LegalHoliday{}.FromYmd(o.GetYear(), o.GetMonth(), o.day)
+	f, _ := LegalHoliday{}.FromYmd(o.year, o.month, o.day)
 	return f
 }
 
 // GetFestival 公历现代节日，如果当天不是公历现代节日，返回nil
 func (o SolarDay) GetFestival() *SolarFestival {
-	f, _ := SolarFestival{}.FromYmd(o.GetYear(), o.GetMonth(), o.day)
+	f, _ := SolarFestival{}.FromYmd(o.year, o.month, o.day)
 	return f
 }
 

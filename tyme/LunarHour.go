@@ -9,76 +9,44 @@ var EightCharProvider IEightCharProvider = DefaultEightCharProvider{}
 
 // LunarHour 农历时辰
 type LunarHour struct {
-	AbstractTyme
-	// 农历日
-	day LunarDay
-	// 时
-	hour int
-	// 分
-	minute int
-	// 秒
-	second int
-	// 公历时刻（第一次使用时才会初始化）
-	solarTime *SolarTime
-	// 干支时辰（第一次使用时才会初始化）
-	sixtyCycleHour *SixtyCycleHour
+	SecondUnit
+}
+
+func (LunarHour) Validate(year int, month int, day int, hour int, minute int, second int) error {
+	err := SecondUnit{}.Validate(year, month, day, hour, minute, second)
+	if err != nil {
+		return err
+	}
+	return LunarDay{}.Validate(year, month, day)
 }
 
 func (LunarHour) FromYmdHms(year int, month int, day int, hour int, minute int, second int) (*LunarHour, error) {
-	if hour < 0 || hour > 23 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal hour: %d", hour))
-	}
-	if minute < 0 || minute > 59 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal minute: %d", minute))
-	}
-	if second < 0 || second > 59 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal second: %d", second))
-	}
-	d, err := LunarDay{}.FromYmd(year, month, day)
+	err := LunarHour{}.Validate(year, month, day, hour, minute, second)
 	if err != nil {
 		return nil, err
 	}
 	return &LunarHour{
-		day:    *d,
-		hour:   hour,
-		minute: minute,
-		second: second,
+		SecondUnit{
+			DayUnit{
+				MonthUnit{
+					YearUnit{
+						year: year,
+					},
+					month,
+				},
+				day,
+			},
+			hour,
+			minute,
+			second,
+		},
 	}, nil
 }
 
 // GetLunarDay 农历日
 func (o LunarHour) GetLunarDay() LunarDay {
-	return o.day
-}
-
-// GetYear 年
-func (o LunarHour) GetYear() int {
-	return o.day.GetYear()
-}
-
-// GetMonth 月
-func (o LunarHour) GetMonth() int {
-	return o.day.GetMonth()
-}
-
-// GetDay 日
-func (o LunarHour) GetDay() int {
-	return o.day.GetDay()
-}
-
-// GetHour 时
-func (o LunarHour) GetHour() int {
-	return o.hour
-}
-
-// GetMinute 分
-func (o LunarHour) GetMinute() int {
-	return o.minute
-}
-
-// GetSecond 秒
-func (o LunarHour) GetSecond() int {
-	return o.second
+	d, _ := LunarDay{}.FromYmd(o.year, o.month, o.day)
+	return *d
 }
 
 func (o LunarHour) GetName() string {
@@ -86,7 +54,7 @@ func (o LunarHour) GetName() string {
 }
 
 func (o LunarHour) String() string {
-	return fmt.Sprintf("%v%v时", o.day, o.GetSixtyCycle().GetName())
+	return fmt.Sprintf("%v%v时", o.GetLunarDay(), o.GetSixtyCycle().GetName())
 }
 
 // GetIndexInDay 位于当天的索引
@@ -96,7 +64,7 @@ func (o LunarHour) GetIndexInDay() int {
 
 func (o LunarHour) Next(n int) LunarHour {
 	if n == 0 {
-		t, _ := LunarHour{}.FromYmdHms(o.GetYear(), o.GetMonth(), o.GetDay(), o.hour, o.minute, o.second)
+		t, _ := LunarHour{}.FromYmdHms(o.year, o.month, o.day, o.hour, o.minute, o.second)
 		return *t
 	}
 	h := o.hour + n*2
@@ -114,15 +82,17 @@ func (o LunarHour) Next(n int) LunarHour {
 		hour += 24
 		days--
 	}
-	d := o.day.Next(days)
+	d := o.GetLunarDay().Next(days)
 	t, _ := LunarHour{}.FromYmdHms(d.GetYear(), d.GetMonth(), d.GetDay(), hour, o.minute, o.second)
 	return *t
 }
 
 // IsBefore 是否在指定农历时辰之前
 func (o LunarHour) IsBefore(target LunarHour) bool {
-	if !o.day.Equals(target.GetLunarDay()) {
-		return o.day.IsBefore(target.GetLunarDay())
+	aDay := o.GetLunarDay()
+	bDay := target.GetLunarDay()
+	if !aDay.Equals(bDay) {
+		return aDay.IsBefore(bDay)
 	}
 	if o.hour != target.GetHour() {
 		return o.hour < target.GetHour()
@@ -135,8 +105,10 @@ func (o LunarHour) IsBefore(target LunarHour) bool {
 
 // IsAfter 是否在指定农历时辰之后
 func (o LunarHour) IsAfter(target LunarHour) bool {
-	if !o.day.Equals(target.GetLunarDay()) {
-		return o.day.IsAfter(target.GetLunarDay())
+	aDay := o.GetLunarDay()
+	bDay := target.GetLunarDay()
+	if !aDay.Equals(bDay) {
+		return aDay.IsAfter(bDay)
 	}
 	if o.hour != target.GetHour() {
 		return o.hour > target.GetHour()
@@ -165,7 +137,7 @@ func (o LunarHour) GetDaySixtyCycle() SixtyCycle {
 // GetSixtyCycle 干支
 func (o LunarHour) GetSixtyCycle() SixtyCycle {
 	earthBranchIndex := o.GetIndexInDay() % 12
-	d := o.day.GetSixtyCycle()
+	d := o.GetLunarDay().GetSixtyCycle()
 	if o.hour >= 23 {
 		d = d.Next(1)
 	}
@@ -180,10 +152,11 @@ func (o LunarHour) GetTwelveStar() TwelveStar {
 
 // GetNineStar 九星
 func (o LunarHour) GetNineStar() NineStar {
-	solar := o.day.GetSolarDay()
+	d := o.GetLunarDay()
+	solar := d.GetSolarDay()
 	dongZhi := SolarTerm{}.FromIndex(solar.GetYear(), 0)
 	earthBranchIndex := o.GetIndexInDay() % 12
-	index := []int{8, 5, 2}[o.day.GetSixtyCycle().GetEarthBranch().GetIndex()%3]
+	index := []int{8, 5, 2}[d.GetSixtyCycle().GetEarthBranch().GetIndex()%3]
 	if !solar.IsBefore(dongZhi.GetJulianDay().GetSolarDay()) && solar.IsBefore(dongZhi.Next(12).GetJulianDay().GetSolarDay()) {
 		index = 8 + earthBranchIndex - index
 	} else {
@@ -194,21 +167,14 @@ func (o LunarHour) GetNineStar() NineStar {
 
 // GetSolarTime 公历时刻
 func (o LunarHour) GetSolarTime() SolarTime {
-	if o.solarTime == nil {
-		d := o.day.GetSolarDay()
-		t, _ := SolarTime{}.FromYmdHms(d.GetYear(), d.GetMonth(), d.GetDay(), o.hour, o.minute, o.second)
-		o.solarTime = t
-	}
-	return *o.solarTime
+	d := o.GetLunarDay().GetSolarDay()
+	t, _ := SolarTime{}.FromYmdHms(d.GetYear(), d.GetMonth(), d.GetDay(), o.hour, o.minute, o.second)
+	return *t
 }
 
 // GetSixtyCycleHour 干支时辰
 func (o LunarHour) GetSixtyCycleHour() SixtyCycleHour {
-	if o.sixtyCycleHour == nil {
-		h := o.GetSolarTime().GetSixtyCycleHour()
-		o.sixtyCycleHour = &h
-	}
-	return *o.sixtyCycleHour
+	return o.GetSolarTime().GetSixtyCycleHour()
 }
 
 // GetEightChar 八字

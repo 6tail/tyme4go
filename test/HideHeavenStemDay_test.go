@@ -1,8 +1,9 @@
 package test
 
 import (
-	"github.com/6tail/tyme4go/tyme"
 	"testing"
+
+	"github.com/6tail/tyme4go/tyme"
 )
 
 func TestHideHeavenStemDay0(t *testing.T) {

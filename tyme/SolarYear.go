@@ -4,23 +4,26 @@ import "fmt"
 
 // SolarYear 公历年
 type SolarYear struct {
-	AbstractTyme
-	// 年
-	year int
+	YearUnit
+}
+
+func (SolarYear) Validate(year int) error {
+	if year < 1 || year > 9999 {
+		return fmt.Errorf(fmt.Sprintf("illegal solar year: %d", year))
+	}
+	return nil
 }
 
 func (SolarYear) FromYear(year int) (*SolarYear, error) {
-	if year < 1 || year > 9999 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal solar year: %d", year))
+	err := SolarYear{}.Validate(year)
+	if err != nil {
+		return nil, err
 	}
 	return &SolarYear{
-		year: year,
+		YearUnit{
+			year: year,
+		},
 	}, nil
-}
-
-// GetYear 年
-func (o SolarYear) GetYear() int {
-	return o.year
 }
 
 // GetDayCount 天数（1582年355天，平年365天，闰年366天）
@@ -68,9 +71,8 @@ func (o SolarYear) GetMonths() []SolarMonth {
 // GetSeasons 季度列表，半年有2个季度。
 func (o SolarYear) GetSeasons() []SolarSeason {
 	var l []SolarSeason
-	y := o.GetYear()
 	for i := 0; i < 4; i++ {
-		m, _ := SolarSeason{}.FromIndex(y, i)
+		m, _ := SolarSeason{}.FromIndex(o.year, i)
 		l = append(l, *m)
 	}
 	return l
@@ -79,9 +81,8 @@ func (o SolarYear) GetSeasons() []SolarSeason {
 // GetHalfYears 半年列表，1年有2个半年。
 func (o SolarYear) GetHalfYears() []SolarHalfYear {
 	var l []SolarHalfYear
-	y := o.GetYear()
 	for i := 0; i < 2; i++ {
-		m, _ := SolarHalfYear{}.FromIndex(y, i)
+		m, _ := SolarHalfYear{}.FromIndex(o.year, i)
 		l = append(l, *m)
 	}
 	return l

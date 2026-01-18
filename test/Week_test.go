@@ -1,8 +1,9 @@
 package test
 
 import (
-	"github.com/6tail/tyme4go/tyme"
 	"testing"
+
+	"github.com/6tail/tyme4go/tyme"
 )
 
 // TestWeek0 星期测试

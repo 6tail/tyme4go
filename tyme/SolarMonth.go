@@ -10,40 +10,35 @@ var SolarMonthDays = []int{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 
 // SolarMonth 公历月
 type SolarMonth struct {
-	AbstractTyme
-	// 公历年
-	year SolarYear
-	// 月
-	month int
+	MonthUnit
+}
+
+func (SolarMonth) Validate(year int, month int) error {
+	if month < 1 || month > 12 {
+		return fmt.Errorf(fmt.Sprintf("illegal solar month: %d", month))
+	}
+	return SolarYear{}.Validate(year)
 }
 
 func (SolarMonth) FromYm(year int, month int) (*SolarMonth, error) {
-	if month < 1 || month > 12 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal solar month: %d", month))
-	}
-	y, err := SolarYear{}.FromYear(year)
+	err := SolarMonth{}.Validate(year, month)
 	if err != nil {
 		return nil, err
 	}
 	return &SolarMonth{
-		year:  *y,
-		month: month,
+		MonthUnit{
+			YearUnit{
+				year: year,
+			},
+			month,
+		},
 	}, nil
 }
 
 // GetSolarYear 公历年
 func (o SolarMonth) GetSolarYear() SolarYear {
-	return o.year
-}
-
-// GetYear 年
-func (o SolarMonth) GetYear() int {
-	return o.year.GetYear()
-}
-
-// GetMonth 月
-func (o SolarMonth) GetMonth() int {
-	return o.month
+	y, _ := SolarYear{}.FromYear(o.year)
+	return *y
 }
 
 // GetDayCount 天数（1582年10月只有21天)
@@ -53,7 +48,7 @@ func (o SolarMonth) GetDayCount() int {
 	}
 	d := SolarMonthDays[o.GetIndexInYear()]
 	//公历闰年2月多一天
-	if 2 == o.month && o.year.IsLeap() {
+	if 2 == o.month && o.GetSolarYear().IsLeap() {
 		d++
 	}
 	return d
@@ -75,12 +70,12 @@ func (o SolarMonth) GetName() string {
 }
 
 func (o SolarMonth) String() string {
-	return fmt.Sprintf("%v%v", o.year, o.GetName())
+	return fmt.Sprintf("%v%v", o.GetSolarYear(), o.GetName())
 }
 
 func (o SolarMonth) Next(n int) SolarMonth {
 	i := o.month - 1 + n
-	m, _ := SolarMonth{}.FromYm((o.GetYear()*12+i)/12, o.IndexOf(i, 12)+1)
+	m, _ := SolarMonth{}.FromYm((o.year*12+i)/12, o.IndexOf(i, 12)+1)
 	return *m
 }
 
@@ -88,9 +83,8 @@ func (o SolarMonth) Next(n int) SolarMonth {
 func (o SolarMonth) GetWeeks(start int) []SolarWeek {
 	var l []SolarWeek
 	size := o.GetWeekCount(start)
-	y := o.GetYear()
 	for i := 0; i < size; i++ {
-		w, _ := SolarWeek{}.FromYm(y, o.month, i, start)
+		w, _ := SolarWeek{}.FromYm(o.year, o.month, i, start)
 		l = append(l, *w)
 	}
 	return l
@@ -100,10 +94,15 @@ func (o SolarMonth) GetWeeks(start int) []SolarWeek {
 func (o SolarMonth) GetDays() []SolarDay {
 	var l []SolarDay
 	size := o.GetDayCount()
-	y := o.GetYear()
 	for i := 1; i <= size; i++ {
-		d, _ := SolarDay{}.FromYmd(y, o.month, i)
+		d, _ := SolarDay{}.FromYmd(o.year, o.month, i)
 		l = append(l, *d)
 	}
 	return l
+}
+
+// GetFirstDay 本月第1天
+func (o SolarMonth) GetFirstDay() SolarDay {
+	d, _ := SolarDay{}.FromYmd(o.year, o.month, 1)
+	return *d
 }

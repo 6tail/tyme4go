@@ -43,7 +43,7 @@ func (SolarFestival) New(festivalType FestivalType, day SolarDay, startYear int,
 
 func (SolarFestival) FromIndex(year int, index int) (*SolarFestival, error) {
 	if index < 0 || index >= len(SolarFestivalNames) {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal index: %d", index))
+		return nil, nil
 	}
 	re, err := regexp.Compile(fmt.Sprintf("@%02d\\d+", index))
 	if err != nil {

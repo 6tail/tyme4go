@@ -1,8 +1,9 @@
 package test
 
 import (
-	"github.com/6tail/tyme4go/tyme"
 	"testing"
+
+	"github.com/6tail/tyme4go/tyme"
 )
 
 // TestSolarTerm0 节气测试
