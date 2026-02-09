@@ -109,6 +109,11 @@ func (LunarFestival) FromYmd(year int, month int, day int) (*LunarFestival, erro
 		}
 		return f, nil
 	}
+	lunarDay, err := LunarDay{}.FromYmd(year, month, day)
+	if err != nil {
+		return nil, err
+	}
+	solarDay := lunarDay.GetSolarDay()
 	re, err = regexp.Compile("@\\d{2}1\\d{2}")
 	if err != nil {
 		return nil, err
@@ -119,10 +124,10 @@ func (LunarFestival) FromYmd(year int, month int, day int) (*LunarFestival, erro
 		if err != nil {
 			return nil, err
 		}
-		solarTerm := SolarTerm{}.FromIndex(year, i)
-		d := solarTerm.GetSolarDay().GetLunarDay()
-		if d.GetYear() == year && d.GetMonth() == month && d.GetDay() == day {
-			f, err := LunarFestival{}.New(TERM, d, &solarTerm, data)
+		term := SolarTerm{}.FromIndex(year, i)
+		termDay := term.GetSolarDay()
+		if termDay.GetYear() == solarDay.GetYear() && termDay.GetMonth() == solarDay.GetMonth() && termDay.GetDay() == solarDay.GetDay() {
+			f, err := LunarFestival{}.New(TERM, *lunarDay, &term, data)
 			if err != nil {
 				return nil, err
 			}
@@ -130,25 +135,23 @@ func (LunarFestival) FromYmd(year int, month int, day int) (*LunarFestival, erro
 		}
 	}
 
-	re, err = regexp.Compile("@\\d{2}2")
-	if err != nil {
-		return nil, err
-	}
-	data = re.FindString(LunarFestivalData)
-	if data == "" {
-		return nil, nil
-	}
-	d, err := LunarDay{}.FromYmd(year, month, day)
-	if err != nil {
-		return nil, err
-	}
-	nextDay := d.Next(1)
-	if nextDay.GetMonth() == 1 && nextDay.GetDay() == 1 {
-		f, err := LunarFestival{}.New(EVE, *d, nil, data)
+	if month == 12 && day > 28 {
+		re, err = regexp.Compile("@\\d{2}2")
 		if err != nil {
 			return nil, err
 		}
-		return f, nil
+		data = re.FindString(LunarFestivalData)
+		if data == "" {
+			return nil, nil
+		}
+		nextDay := lunarDay.Next(1)
+		if nextDay.GetMonth() == 1 && nextDay.GetDay() == 1 {
+			f, err := LunarFestival{}.New(EVE, *lunarDay, nil, data)
+			if err != nil {
+				return nil, err
+			}
+			return f, nil
+		}
 	}
 	return nil, nil
 }
