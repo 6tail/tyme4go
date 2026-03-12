@@ -18,7 +18,8 @@ func TestRabByungDay0(t *testing.T) {
 
 	e, _ := tyme.RabByungElement{}.FromName("铁")
 	z, _ := tyme.Zodiac{}.FromName("虎")
-	d, _ = tyme.RabByungDay{}.FromElementZodiac(15, *e, *z, 12, 1)
+	y, _ := tyme.RabByungYear{}.FromElementZodiac(15, *e, *z)
+	d, _ = tyme.RabByungDay{}.FromYmd(y.GetYear(), 12, 1)
 	excepted = "1951年1月8日"
 	got = d.GetSolarDay().String()
 	if excepted != got {
@@ -41,7 +42,8 @@ func TestRabByungDay1(t *testing.T) {
 
 	e, _ := tyme.RabByungElement{}.FromName("铁")
 	z, _ := tyme.Zodiac{}.FromName("马")
-	d, _ = tyme.RabByungDay{}.FromElementZodiac(17, *e, *z, 12, 30)
+	y, _ := tyme.RabByungYear{}.FromElementZodiac(17, *e, *z)
+	d, _ = tyme.RabByungDay{}.FromYmd(y.GetYear(), 12, 30)
 	excepted = "2051年2月11日"
 	got = d.GetSolarDay().String()
 	if excepted != got {
@@ -61,7 +63,8 @@ func TestRabByungDay2(t *testing.T) {
 
 	e, _ := tyme.RabByungElement{}.FromName("木")
 	z, _ := tyme.Zodiac{}.FromName("蛇")
-	d, _ = tyme.RabByungDay{}.FromElementZodiac(16, *e, *z, 2, 25)
+	y, _ := tyme.RabByungYear{}.FromElementZodiac(16, *e, *z)
+	d, _ = tyme.RabByungDay{}.FromYmd(y.GetYear(), 2, 25)
 	excepted = "2025年4月23日"
 	got = d.GetSolarDay().String()
 	if excepted != got {
@@ -81,7 +84,8 @@ func TestRabByungDay3(t *testing.T) {
 
 	e, _ := tyme.RabByungElement{}.FromName("铁")
 	z, _ := tyme.Zodiac{}.FromName("兔")
-	d, _ = tyme.RabByungDay{}.FromElementZodiac(15, *e, *z, 1, 2)
+	y, _ := tyme.RabByungYear{}.FromElementZodiac(15, *e, *z)
+	d, _ = tyme.RabByungDay{}.FromYmd(y.GetYear(), 1, 2)
 	excepted = "1951年2月8日"
 	got = d.GetSolarDay().String()
 	if excepted != got {
@@ -101,7 +105,8 @@ func TestRabByungDay4(t *testing.T) {
 
 	e, _ := tyme.RabByungElement{}.FromName("铁")
 	z, _ := tyme.Zodiac{}.FromName("虎")
-	d, _ = tyme.RabByungDay{}.FromElementZodiac(15, *e, *z, 12, -16)
+	y, _ := tyme.RabByungYear{}.FromElementZodiac(15, *e, *z)
+	d, _ = tyme.RabByungDay{}.FromYmd(y.GetYear(), 12, -16)
 	excepted = "1951年1月24日"
 	got = d.GetSolarDay().String()
 	if excepted != got {
@@ -121,7 +126,8 @@ func TestRabByungDay5(t *testing.T) {
 
 	e, _ := tyme.RabByungElement{}.FromName("铁")
 	z, _ := tyme.Zodiac{}.FromName("牛")
-	d, _ = tyme.RabByungDay{}.FromElementZodiac(15, *e, *z, 5, 11)
+	y, _ := tyme.RabByungYear{}.FromElementZodiac(15, *e, *z)
+	d, _ = tyme.RabByungDay{}.FromYmd(y.GetYear(), 5, 11)
 	excepted = "1961年6月24日"
 	got = d.GetSolarDay().String()
 	if excepted != got {
@@ -141,7 +147,8 @@ func TestRabByungDay6(t *testing.T) {
 
 	e, _ := tyme.RabByungElement{}.FromName("铁")
 	z, _ := tyme.Zodiac{}.FromName("兔")
-	d, _ = tyme.RabByungDay{}.FromElementZodiac(15, *e, *z, 12, 28)
+	y, _ := tyme.RabByungYear{}.FromElementZodiac(15, *e, *z)
+	d, _ = tyme.RabByungDay{}.FromYmd(y.GetYear(), 12, 28)
 	excepted = "1952年2月23日"
 	got = d.GetSolarDay().String()
 	if excepted != got {

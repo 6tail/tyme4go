@@ -93,39 +93,22 @@ func (o SixtyCycleDay) GetTwelveStar() TwelveStar {
 // GetNineStar 九星
 func (o SixtyCycleDay) GetNineStar() NineStar {
 	d := o.solarDay
-	dongZhi := SolarTerm{}.FromIndex(d.GetYear(), 0)
-	dongZhiSolar := dongZhi.GetSolarDay()
-	xiaZhiSolar := dongZhi.Next(12).GetSolarDay()
-	dongZhiSolar2 := dongZhi.Next(24).GetSolarDay()
-	dongZhiIndex := dongZhiSolar.GetLunarDay().GetSixtyCycle().GetIndex()
-	xiaZhiIndex := xiaZhiSolar.GetLunarDay().GetSixtyCycle().GetIndex()
-	dongZhiIndex2 := dongZhiSolar2.GetLunarDay().GetSixtyCycle().GetIndex()
-	index := -dongZhiIndex
-	if dongZhiIndex > 29 {
-		index = 60 - dongZhiIndex
+	winterSolstice := SolarTerm{}.FromIndex(d.year, 0).GetSolarDay()
+	summerSolstice := SolarTerm{}.FromIndex(d.year, 12).GetSolarDay()
+	nextWinterSolstice := SolarTerm{}.FromIndex(d.year+1, 0).GetSolarDay()
+	w := winterSolstice.Next(winterSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
+	s := summerSolstice.Next(summerSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
+	n := nextWinterSolstice.Next(nextWinterSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
+	if d.IsBefore(w) {
+		return NineStar{}.FromIndex(w.Subtract(d) - 1)
 	}
-	solarShunBai := dongZhiSolar.Next(index)
-	index = -dongZhiIndex2
-	if dongZhiIndex2 > 29 {
-		index = 60 - dongZhiIndex2
+	if d.IsBefore(s) {
+		return NineStar{}.FromIndex(d.Subtract(w))
 	}
-	solarShunBai2 := dongZhiSolar2.Next(index)
-	index = -xiaZhiIndex
-	if xiaZhiIndex > 29 {
-		index = 60 - xiaZhiIndex
+	if d.IsBefore(n) {
+		return NineStar{}.FromIndex(n.Subtract(d) - 1)
 	}
-	solarNiZi := xiaZhiSolar.Next(index)
-	offset := 0
-	if !d.IsBefore(solarShunBai) && d.IsBefore(solarNiZi) {
-		offset = d.Subtract(solarShunBai)
-	} else if !d.IsBefore(solarNiZi) && d.IsBefore(solarShunBai2) {
-		offset = 8 - d.Subtract(solarNiZi)
-	} else if !d.IsBefore(solarShunBai2) {
-		offset = d.Subtract(solarShunBai2)
-	} else if d.IsBefore(solarShunBai) {
-		offset = 8 + solarShunBai.Subtract(d)
-	}
-	return NineStar{}.FromIndex(offset)
+	return NineStar{}.FromIndex(d.Subtract(n))
 }
 
 // GetJupiterDirection 太岁方位

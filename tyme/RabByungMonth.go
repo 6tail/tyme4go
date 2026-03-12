@@ -13,18 +13,34 @@ var onceRabByungMonth sync.Once
 
 // RabByungMonth 藏历月，仅支持藏历1950年十二月至藏历2050年十二月
 type RabByungMonth struct {
-	AbstractTyme
-	// 藏历年
-	year RabByungYear
-	// 月
-	month int
+	MonthUnit
 	// 是否闰月
 	leap bool
-	// 位于当年的索引，0-12
-	indexInYear int
 }
 
-func NewRabByungMonth(year RabByungYear, month int) (*RabByungMonth, error) {
+func (RabByungMonth) Validate(year int, month int) error {
+	if month == 0 || month > 12 || month < -12 {
+		return fmt.Errorf("illegal rab-byung month: %d", month)
+	}
+	if year < 1950 || year > 2050 {
+		return fmt.Errorf("rab-byung year %d must between 1950 and 2050", year)
+	}
+	leap := month < 0
+	m := month
+	if m < 0 {
+		m = -m
+	}
+	if year == 1950 && m < 12 {
+		return fmt.Errorf("month %d must be 12 in rab-byung year %d", month, year)
+	}
+	y, _ := RabByungYear{}.FromYear(year)
+	if leap && m != y.GetLeapMonth() {
+		return fmt.Errorf("illegal leap month %d in rab-byung year %d", m, year)
+	}
+	return nil
+}
+
+func NewRabByungMonth(year int, month int) (*RabByungMonth, error) {
 	onceRabByungMonth.Do(func() {
 		RabByungMonthDays = make(map[int][]int)
 		y := 1950
@@ -46,63 +62,33 @@ func NewRabByungMonth(year RabByungYear, month int) (*RabByungMonth, error) {
 			m = 0
 		}
 	})
-	if month == 0 || month > 12 || month < -12 {
-		return nil, fmt.Errorf("illegal rab-byung month: %d", month)
-	}
-	y := year.GetYear()
-	if y < 1950 || y > 2050 {
-		return nil, fmt.Errorf("rab-byung year %d must between 1950 and 2050", y)
+
+	err := RabByungMonth{}.Validate(year, month)
+	if err != nil {
+		return nil, err
 	}
 	m := month
 	if m < 0 {
 		m = -m
 	}
-	if y == 1950 && m < 12 {
-		return nil, fmt.Errorf("month %d must be 12 in rab-byung year %d", month, y)
-	}
-	leap := month < 0
-	leapMonth := year.GetLeapMonth()
-	if leap && m != leapMonth {
-		return nil, fmt.Errorf("illegal leap month %d in rab-byung year %d", m, y)
-	}
-	index := m - 1
-	if leap || (0 < leapMonth && leapMonth < m) {
-		index++
-	}
 	return &RabByungMonth{
-		year:        year,
-		month:       m,
-		leap:        leap,
-		indexInYear: index,
+		MonthUnit{
+			YearUnit{
+				year: year,
+			},
+			m,
+		},
+		month < 0,
 	}, nil
 }
 
-func (RabByungMonth) FromYm(year, month int) (*RabByungMonth, error) {
-	y, err := RabByungYear{}.FromYear(year)
-	if err != nil {
-		return nil, err
-	}
-	return NewRabByungMonth(*y, month)
-}
-
-func (RabByungMonth) FromElementZodiac(rabByungIndex int, element RabByungElement, zodiac Zodiac, month int) (*RabByungMonth, error) {
-	y, err := RabByungYear{}.FromElementZodiac(rabByungIndex, element, zodiac)
-	if err != nil {
-		return nil, err
-	}
-	return NewRabByungMonth(*y, month)
+func (RabByungMonth) FromYm(year int, month int) (*RabByungMonth, error) {
+	return NewRabByungMonth(year, month)
 }
 
 func (o RabByungMonth) GetRabByungYear() RabByungYear {
-	return o.year
-}
-
-func (o RabByungMonth) GetYear() int {
-	return o.year.GetYear()
-}
-
-func (o RabByungMonth) GetMonth() int {
-	return o.month
+	y, _ := RabByungYear{}.FromYear(o.year)
+	return *y
 }
 
 func (o RabByungMonth) GetMonthWithLeap() int {
@@ -113,7 +99,16 @@ func (o RabByungMonth) GetMonthWithLeap() int {
 }
 
 func (o RabByungMonth) GetIndexInYear() int {
-	return o.indexInYear
+	index := o.month - 1
+	if o.leap {
+		index += 1
+	} else {
+		leapMonth := o.GetRabByungYear().GetLeapMonth()
+		if leapMonth > 0 && o.month > leapMonth {
+			index += 1
+		}
+	}
+	return index
 }
 
 func (o RabByungMonth) IsLeap() bool {
@@ -137,15 +132,15 @@ func (o RabByungMonth) GetAlias() string {
 }
 
 func (o RabByungMonth) String() string {
-	return fmt.Sprintf("%s%s", o.year.GetName(), o.GetName())
+	return fmt.Sprintf("%s%s", o.GetRabByungYear().GetName(), o.GetName())
 }
 
 func (o RabByungMonth) Next(n int) (*RabByungMonth, error) {
 	if n == 0 {
 		return NewRabByungMonth(o.year, o.GetMonthWithLeap())
 	}
-	m := o.indexInYear + 1 + n
-	y := &o.year
+	m := o.GetIndexInYear() + 1 + n
+	y := o.GetRabByungYear()
 	if n > 0 {
 		monthCount := y.GetMonthCount()
 		for m > monthCount {
@@ -154,7 +149,7 @@ func (o RabByungMonth) Next(n int) (*RabByungMonth, error) {
 			if err != nil {
 				return nil, err
 			}
-			y = ny
+			y = *ny
 			monthCount = y.GetMonthCount()
 		}
 	} else {
@@ -163,7 +158,7 @@ func (o RabByungMonth) Next(n int) (*RabByungMonth, error) {
 			if err != nil {
 				return nil, err
 			}
-			y = ny
+			y = *ny
 			m += y.GetMonthCount()
 		}
 	}
@@ -181,16 +176,17 @@ func (o RabByungMonth) Next(n int) (*RabByungMonth, error) {
 	if leap {
 		m = -m
 	}
-	return NewRabByungMonth(*y, m)
+	return NewRabByungMonth(y.GetYear(), m)
 }
 
 func (o RabByungMonth) GetFirstDay() RabByungDay {
-	d, _ := NewRabByungDay(o, 1)
+	d, _ := NewRabByungDay(o.year, o.GetMonthWithLeap(), 1)
 	return *d
 }
 
 func (o RabByungMonth) GetDays() []RabByungDay {
 	var days []RabByungDay
+	m := o.GetMonthWithLeap()
 	missDays := o.GetMissDays()
 	leapDays := o.GetLeapDays()
 	missDayMap := make(map[int]bool)
@@ -205,10 +201,10 @@ func (o RabByungMonth) GetDays() []RabByungDay {
 		if _, exists := missDayMap[i]; exists {
 			continue
 		}
-		d, _ := NewRabByungDay(o, i)
+		d, _ := NewRabByungDay(o.year, m, i)
 		days = append(days, *d)
 		if _, exists := leapDayMap[i]; exists {
-			ld, _ := NewRabByungDay(o, -i)
+			ld, _ := NewRabByungDay(o.year, m, -i)
 			days = append(days, *ld)
 		}
 	}

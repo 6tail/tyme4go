@@ -42,6 +42,24 @@ func (o LoopTyme) StepsTo(targetIndex int) int {
 	return o.indexOf(targetIndex - o.index)
 }
 
+func (o LoopTyme) StepsBackTo(targetIndex int) int {
+	n := o.GetSize()
+	return -((o.index - targetIndex + n) % n)
+}
+
+func (o LoopTyme) StepsCloseTo(targetIndex int) int {
+	d1 := o.StepsTo(targetIndex)
+	d2 := o.StepsBackTo(targetIndex)
+	t := d2
+	if t < 0 {
+		t = -t
+	}
+	if d1 <= t {
+		return d1
+	}
+	return d2
+}
+
 func (LoopTyme) FromIndex(names []string, index int) LoopTyme {
 	instance := LoopTyme{names: names}
 	instance.index = instance.nextIndex(index)

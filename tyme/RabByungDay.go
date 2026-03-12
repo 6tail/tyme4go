@@ -6,24 +6,26 @@ var RabByungDayNames = []string{"初一", "初二", "初三", "初四", "初五"
 
 // RabByungDay 藏历日，仅支持藏历1950年十二月初一（公历1951年1月8日）至藏历2050年十二月三十（公历2051年2月11日）
 type RabByungDay struct {
-	AbstractTyme
-	// 藏历月
-	month RabByungMonth
-	day   int
-	leap  bool
+	DayUnit
+	// 是否闰日
+	leap bool
 }
 
-func NewRabByungDay(month RabByungMonth, day int) (*RabByungDay, error) {
+func (RabByungDay) Validate(year int, month int, day int) error {
 	if day == 0 || day < -30 || day > 30 {
-		return nil, fmt.Errorf("illegal day %d in %s", day, month)
+		return fmt.Errorf("illegal day %d in %s", day, month)
+	}
+	m, err := RabByungMonth{}.FromYm(year, month)
+	if err != nil {
+		return err
 	}
 	leap := day < 0
 	d := day
-	if leap {
+	if d < 0 {
 		d = -d
 	}
-	missDays := month.GetMissDays()
-	leapDays := month.GetLeapDays()
+	missDays := m.GetMissDays()
+	leapDays := m.GetLeapDays()
 	missDayMap := make(map[int]bool)
 	leapDayMap := make(map[int]bool)
 	for _, d := range missDays {
@@ -34,30 +36,41 @@ func NewRabByungDay(month RabByungMonth, day int) (*RabByungDay, error) {
 	}
 	if leap {
 		if !leapDayMap[d] {
-			return nil, fmt.Errorf("illegal leap day %d in %s", d, month)
+			return fmt.Errorf("illegal leap day %d in %s", d, m)
 		}
 	} else {
 		if _, exists := missDayMap[d]; exists {
-			return nil, fmt.Errorf("illegal day %d in %s", d, month)
+			return fmt.Errorf("illegal day %d in %s", d, m)
 		}
 	}
-	return &RabByungDay{month: month, day: d, leap: leap}, nil
+	return nil
 }
 
-func (RabByungDay) FromYmd(year, month, day int) (*RabByungDay, error) {
-	m, err := RabByungMonth{}.FromYm(year, month)
+func NewRabByungDay(year int, month int, day int) (*RabByungDay, error) {
+	err := RabByungDay{}.Validate(year, month, day)
 	if err != nil {
 		return nil, err
 	}
-	return NewRabByungDay(*m, day)
+	d := day
+	if d < 0 {
+		d = -d
+	}
+	return &RabByungDay{
+		DayUnit{
+			MonthUnit{
+				YearUnit{
+					year: year,
+				},
+				month,
+			},
+			d,
+		},
+		day < 0,
+	}, nil
 }
 
-func (RabByungDay) FromElementZodiac(rabByungIndex int, element RabByungElement, zodiac Zodiac, month, day int) (*RabByungDay, error) {
-	m, err := RabByungMonth{}.FromElementZodiac(rabByungIndex, element, zodiac, month)
-	if err != nil {
-		return nil, err
-	}
-	return NewRabByungDay(*m, day)
+func (RabByungDay) FromYmd(year int, month int, day int) (*RabByungDay, error) {
+	return NewRabByungDay(year, month, day)
 }
 
 func (RabByungDay) FromSolarDay(solarDay SolarDay) (*RabByungDay, error) {
@@ -91,23 +104,12 @@ func (RabByungDay) FromSolarDay(solarDay SolarDay) (*RabByungDay, error) {
 			}
 		}
 	}
-	return NewRabByungDay(*m, day)
+	return NewRabByungDay(m.year, m.GetMonthWithLeap(), day)
 }
 
 func (o RabByungDay) GetRabByungMonth() RabByungMonth {
-	return o.month
-}
-
-func (o RabByungDay) GetYear() int {
-	return o.month.GetYear()
-}
-
-func (o RabByungDay) GetMonth() int {
-	return o.month.GetMonthWithLeap()
-}
-
-func (o RabByungDay) GetDay() int {
-	return o.day
+	m, _ := RabByungMonth{}.FromYm(o.year, o.month)
+	return *m
 }
 
 func (o RabByungDay) IsLeap() bool {
@@ -130,7 +132,7 @@ func (o RabByungDay) GetName() string {
 }
 
 func (o RabByungDay) String() string {
-	return fmt.Sprintf("%s%s", o.month, o.GetName())
+	return fmt.Sprintf("%s%s", o.GetRabByungMonth(), o.GetName())
 }
 
 func (o RabByungDay) Subtract(target RabByungDay) int {
@@ -140,8 +142,9 @@ func (o RabByungDay) Subtract(target RabByungDay) int {
 func (o RabByungDay) GetSolarDay() SolarDay {
 	start, _ := SolarDay{}.FromYmd(1951, 1, 7)
 	m, _ := RabByungMonth{}.FromYm(1950, 12)
+	cm := o.GetRabByungMonth()
 	n := 0
-	for !o.month.Equals(*m) {
+	for !cm.Equals(*m) {
 		n += m.GetDayCount()
 		m, _ = m.Next(1)
 	}

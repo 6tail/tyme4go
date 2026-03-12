@@ -175,44 +175,36 @@ func (o SolarDay) GetPhenology() Phenology {
 
 // GetDogDay 三伏天
 func (o SolarDay) GetDogDay() *DogDay {
-	// 夏至
-	xiaZhi := SolarTerm{}.FromIndex(o.year, 12)
-	// 第1个庚日
-	start := xiaZhi.GetSolarDay()
-	// 第3个庚日，即初伏第1天
-	start = start.Next(start.GetLunarDay().GetSixtyCycle().GetHeavenStem().StepsTo(6) + 20)
-	days := o.Subtract(start)
-	// 初伏以前
-	if days < 0 {
+	// 初伏，夏至后第3个庚日
+	e, _ := Event{}.Builder().TermHeavenStem(12, 6, 20).Build()
+	d0 := e.GetSolarDay(o.year)
+	if d0 == nil {
 		return nil
 	}
-	if days < 10 {
-		d := DogDay{}.New(Dog{}.FromIndex(0), days)
-		return &d
-	}
-	// 第4个庚日，中伏第1天
-	start = start.Next(10)
-	days = o.Subtract(start)
-	if days < 10 {
-		d := DogDay{}.New(Dog{}.FromIndex(1), days)
-		return &d
-	}
-	// 第5个庚日，中伏第11天或末伏第1天
-	start = start.Next(10)
-	days = o.Subtract(start)
-	// 立秋
-	if xiaZhi.Next(3).GetSolarDay().IsAfter(start) {
-		if days < 10 {
-			d := DogDay{}.New(Dog{}.FromIndex(1), days+10)
-			return &d
-		}
-		start = start.Next(10)
-		days = o.Subtract(start)
-	}
-	if days >= 10 {
+	// 中伏，夏至后第4个庚日
+	e, _ = Event{}.Builder().TermHeavenStem(12, 6, 30).Build()
+	d1 := e.GetSolarDay(o.year)
+	if d1 == nil {
 		return nil
 	}
-	d := DogDay{}.New(Dog{}.FromIndex(2), days)
+	// 末伏，立秋后第1个庚日
+	e, _ = Event{}.Builder().TermHeavenStem(15, 6, 0).Build()
+	d2 := e.GetSolarDay(o.year)
+	if d2 == nil {
+		return nil
+	}
+	if o.IsBefore(*d0) || o.IsAfter(d2.Next(9)) {
+		return nil
+	}
+	if !o.IsBefore(*d2) {
+		d := DogDay{}.New(Dog{}.FromIndex(2), o.Subtract(*d2))
+		return &d
+	}
+	if o.IsBefore(*d1) {
+		d := DogDay{}.New(Dog{}.FromIndex(0), o.Subtract(*d0))
+		return &d
+	}
+	d := DogDay{}.New(Dog{}.FromIndex(1), o.Subtract(*d1))
 	return &d
 }
 
@@ -271,25 +263,26 @@ func (o SolarDay) GetHideHeavenStemDay() HideHeavenStemDay {
 
 // GetPlumRainDay 梅雨天（芒种后的第1个丙日入梅，小暑后的第1个未日出梅）
 func (o SolarDay) GetPlumRainDay() *PlumRainDay {
-	// 芒种
-	grainInEar := SolarTerm{}.FromIndex(o.year, 11)
-	start := grainInEar.GetSolarDay()
-	// 芒种后的第1个丙日
-	start = start.Next(start.GetLunarDay().GetSixtyCycle().GetHeavenStem().StepsTo(2))
-
-	// 小暑
-	end := grainInEar.Next(2).GetSolarDay()
-	// 小暑后的第1个未日
-	end = end.Next(end.GetLunarDay().GetSixtyCycle().GetEarthBranch().StepsTo(7))
-
-	if o.IsBefore(start) || o.IsAfter(end) {
+	// 入梅，芒种后第1个丙日
+	e, _ := Event{}.Builder().TermHeavenStem(11, 2, 0).Build()
+	start := e.GetSolarDay(o.year)
+	if start == nil {
 		return nil
 	}
-	if o.Equals(end) {
+	// 出梅，小暑后第1个未日
+	e, _ = Event{}.Builder().TermEarthBranch(13, 7, 0).Build()
+	end := e.GetSolarDay(o.year)
+	if end == nil {
+		return nil
+	}
+	if o.IsBefore(*start) || o.IsAfter(*end) {
+		return nil
+	}
+	if o.Equals(*end) {
 		t := PlumRainDay{}.New(PlumRain{}.FromIndex(1), 0)
 		return &t
 	}
-	t := PlumRainDay{}.New(PlumRain{}.FromIndex(0), o.Subtract(start))
+	t := PlumRainDay{}.New(PlumRain{}.FromIndex(0), o.Subtract(*start))
 	return &t
 }
 

@@ -12,8 +12,8 @@ const (
 	EVE
 )
 
-func (d FestivalType) GetCode() int {
-	return int(d)
+func (o FestivalType) GetCode() int {
+	return int(o)
 }
 
 func NewFestivalType(code int) FestivalType {
@@ -27,8 +27,8 @@ func NewFestivalType(code int) FestivalType {
 	}
 }
 
-func (d FestivalType) GetName() string {
-	switch d {
+func (o FestivalType) GetName() string {
+	switch o {
 	case DAY:
 		return "日期"
 	case TERM:
@@ -38,6 +38,6 @@ func (d FestivalType) GetName() string {
 	}
 }
 
-func (d FestivalType) String() string {
-	return d.GetName()
+func (o FestivalType) String() string {
+	return o.GetName()
 }

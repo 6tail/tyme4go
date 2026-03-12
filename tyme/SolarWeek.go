@@ -79,10 +79,9 @@ func (o SolarWeek) GetFirstDay() SolarDay {
 }
 
 func (o SolarWeek) Next(n int) SolarWeek {
-	d := o.index
+	d := o.index + n
 	m := o.GetSolarMonth()
 	if n > 0 {
-		d += n
 		weekCount := m.GetWeekCount(o.start)
 		for d >= weekCount {
 			d -= weekCount
@@ -93,7 +92,6 @@ func (o SolarWeek) Next(n int) SolarWeek {
 			weekCount = m.GetWeekCount(o.start)
 		}
 	} else if n < 0 {
-		d += n
 		for d < 0 {
 			if m.GetFirstDay().GetWeek().index != o.start {
 				d -= 1

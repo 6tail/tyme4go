@@ -76,13 +76,15 @@ func (o LunarDay) IsBefore(target LunarDay) bool {
 	aMonth := o.month
 	bMonth := target.GetMonth()
 	if aMonth != bMonth {
-		if aMonth < 0 {
-			aMonth = -aMonth
+		b := bMonth
+		if b < 0 {
+			b = -b
 		}
-		if bMonth < 0 {
-			bMonth = -bMonth
+		a := aMonth
+		if a < 0 {
+			a = -a
 		}
-		return aMonth < bMonth
+		return aMonth == b || a < b
 	}
 	return o.day < target.GetDay()
 }
@@ -97,13 +99,15 @@ func (o LunarDay) IsAfter(target LunarDay) bool {
 	aMonth := o.month
 	bMonth := target.GetMonth()
 	if aMonth != bMonth {
-		if aMonth < 0 {
-			aMonth = -aMonth
+		a := aMonth
+		if a < 0 {
+			a = -a
 		}
-		if bMonth < 0 {
-			bMonth = -bMonth
+		b := bMonth
+		if b < 0 {
+			b = -b
 		}
-		return aMonth > bMonth
+		return a == bMonth || a > b
 	}
 	return o.day > target.GetDay()
 }
@@ -120,9 +124,7 @@ func (o LunarDay) GetMonthSixtyCycle() SixtyCycle {
 
 // GetSixtyCycle 干支
 func (o LunarDay) GetSixtyCycle() SixtyCycle {
-	offset := int(o.GetLunarMonth().GetFirstJulianDay().Next(o.day - 12).GetDay())
-	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex(offset).GetName() + EarthBranch{}.FromIndex(offset).GetName())
-	return *t
+	return SixtyCycle{}.FromIndex(int(o.GetLunarMonth().GetFirstJulianDay().Next(o.day - 12).GetDay()))
 }
 
 // GetDuty 建除十二值神
@@ -138,39 +140,28 @@ func (o LunarDay) GetTwelveStar() TwelveStar {
 // GetNineStar 九星
 func (o LunarDay) GetNineStar() NineStar {
 	d := o.GetSolarDay()
-	dongZhi := SolarTerm{}.FromIndex(d.year, 0)
-	dongZhiSolar := dongZhi.GetSolarDay()
-	xiaZhiSolar := dongZhi.Next(12).GetSolarDay()
-	dongZhiSolar2 := dongZhi.Next(24).GetSolarDay()
-	dongZhiIndex := dongZhiSolar.GetLunarDay().GetSixtyCycle().GetIndex()
-	xiaZhiIndex := xiaZhiSolar.GetLunarDay().GetSixtyCycle().GetIndex()
-	dongZhiIndex2 := dongZhiSolar2.GetLunarDay().GetSixtyCycle().GetIndex()
-	index := -dongZhiIndex
-	if dongZhiIndex > 29 {
-		index = 60 - dongZhiIndex
+	winterSolstice := SolarTerm{}.FromIndex(d.year, 0).GetSolarDay()
+	summerSolstice := SolarTerm{}.FromIndex(d.year, 12).GetSolarDay()
+	nextWinterSolstice := SolarTerm{}.FromIndex(d.year+1, 0).GetSolarDay()
+	// 距冬至最近的甲子日
+	w := winterSolstice.Next(winterSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
+	// 距夏至最近的甲子日
+	s := summerSolstice.Next(summerSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
+	// 距下个冬至最近的甲子日
+	n := nextWinterSolstice.Next(nextWinterSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
+	// 43210012345678876543210012345
+	//      w        s        n
+	//     冬至     夏至      冬至
+	if d.IsBefore(w) {
+		return NineStar{}.FromIndex(w.Subtract(d) - 1)
 	}
-	solarShunBai := dongZhiSolar.Next(index)
-	index = -dongZhiIndex2
-	if dongZhiIndex2 > 29 {
-		index = 60 - dongZhiIndex2
+	if d.IsBefore(s) {
+		return NineStar{}.FromIndex(d.Subtract(w))
 	}
-	solarShunBai2 := dongZhiSolar2.Next(index)
-	index = -xiaZhiIndex
-	if xiaZhiIndex > 29 {
-		index = 60 - xiaZhiIndex
+	if d.IsBefore(n) {
+		return NineStar{}.FromIndex(n.Subtract(d) - 1)
 	}
-	solarNiZi := xiaZhiSolar.Next(index)
-	offset := 0
-	if !d.IsBefore(solarShunBai) && d.IsBefore(solarNiZi) {
-		offset = d.Subtract(solarShunBai)
-	} else if !d.IsBefore(solarNiZi) && d.IsBefore(solarShunBai2) {
-		offset = 8 - d.Subtract(solarNiZi)
-	} else if !d.IsBefore(solarShunBai2) {
-		offset = d.Subtract(solarShunBai2)
-	} else if d.IsBefore(solarShunBai) {
-		offset = 8 + solarShunBai.Subtract(d)
-	}
-	return NineStar{}.FromIndex(offset)
+	return NineStar{}.FromIndex(d.Subtract(n))
 }
 
 // GetJupiterDirection 太岁方位

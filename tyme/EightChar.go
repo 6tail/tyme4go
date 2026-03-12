@@ -60,49 +60,23 @@ func (o EightChar) GetHour() SixtyCycle {
 // GetFetalOrigin 胎元
 func (o EightChar) GetFetalOrigin() SixtyCycle {
 	m := o.GetMonth()
-	t, _ := SixtyCycle{}.FromName(m.GetHeavenStem().Next(1).GetName() + m.GetEarthBranch().Next(3).GetName())
-	return *t
+	return SixtyCycle{}.FromIndex(m.GetHeavenStem().Next(1).GetIndex()*6 - m.GetEarthBranch().Next(3).GetIndex()*5)
 }
 
 // GetFetalBreath 胎息
 func (o EightChar) GetFetalBreath() SixtyCycle {
 	d := o.GetDay()
-	t, _ := SixtyCycle{}.FromName(d.GetHeavenStem().Next(5).GetName() + EarthBranch{}.FromIndex(13-d.GetEarthBranch().GetIndex()).GetName())
-	return *t
+	return SixtyCycle{}.FromIndex(d.GetHeavenStem().Next(5).GetIndex()*6 + d.GetEarthBranch().GetIndex()*5 - 65)
 }
 
 // GetOwnSign 命宫
 func (o EightChar) GetOwnSign() SixtyCycle {
-	m := o.GetMonth().GetEarthBranch().GetIndex() - 1
-	if m < 1 {
-		m += 12
-	}
-	h := o.hour.GetEarthBranch().GetIndex() - 1
-	if h < 1 {
-		h += 12
-	}
-	offset := m + h
-	if offset >= 14 {
-		offset = 26 - offset
-	} else {
-		offset = 14 - offset
-	}
-	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex((o.GetYear().GetHeavenStem().GetIndex()+1)*2+offset-1).GetName() + EarthBranch{}.FromIndex(offset+1).GetName())
-	return *t
+	return SixtyCycle{}.FromIndex(o.GetYear().GetHeavenStem().GetIndex()*12 + (27-o.GetMonth().GetEarthBranch().GetIndex()-o.hour.GetEarthBranch().GetIndex())%12 + 2)
 }
 
 // GetBodySign 身宫
 func (o EightChar) GetBodySign() SixtyCycle {
-	offset := o.GetMonth().GetEarthBranch().GetIndex() - 1
-	if offset < 1 {
-		offset += 12
-	}
-	offset += o.hour.GetEarthBranch().GetIndex() + 1
-	if offset > 12 {
-		offset -= 12
-	}
-	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex((o.GetYear().GetHeavenStem().GetIndex()+1)*2+offset-1).GetName() + EarthBranch{}.FromIndex(offset+1).GetName())
-	return *t
+	return SixtyCycle{}.FromIndex(o.GetYear().GetHeavenStem().GetIndex()*12 + (11+o.GetMonth().GetEarthBranch().GetIndex()+o.hour.GetEarthBranch().GetIndex())%12 + 2)
 }
 
 // Deprecated: Use SixtyCycleDay.GetDuty instead.

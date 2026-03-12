@@ -66,10 +66,9 @@ func (o LunarWeek) GetFirstDay() LunarDay {
 }
 
 func (o LunarWeek) Next(n int) LunarWeek {
-	d := o.index
+	d := o.index + n
 	m := o.GetLunarMonth()
 	if n > 0 {
-		d += n
 		weekCount := m.GetWeekCount(o.start)
 		for d >= weekCount {
 			d -= weekCount
@@ -80,7 +79,6 @@ func (o LunarWeek) Next(n int) LunarWeek {
 			weekCount = m.GetWeekCount(o.start)
 		}
 	} else if n < 0 {
-		d += n
 		for d < 0 {
 			if m.GetFirstDay().GetWeek().index != o.start {
 				d -= 1

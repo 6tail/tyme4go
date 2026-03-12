@@ -12,8 +12,8 @@ const (
 	MAIN
 )
 
-func (d HideHeavenStemType) GetCode() int {
-	return int(d)
+func (o HideHeavenStemType) GetCode() int {
+	return int(o)
 }
 
 func NewHideHeavenStemType(code int) HideHeavenStemType {
@@ -27,8 +27,8 @@ func NewHideHeavenStemType(code int) HideHeavenStemType {
 	}
 }
 
-func (d HideHeavenStemType) GetName() string {
-	switch d {
+func (o HideHeavenStemType) GetName() string {
+	switch o {
 	case MIDDLE:
 		return "中气"
 	case MAIN:
@@ -38,6 +38,6 @@ func (d HideHeavenStemType) GetName() string {
 	}
 }
 
-func (d HideHeavenStemType) String() string {
-	return d.GetName()
+func (o HideHeavenStemType) String() string {
+	return o.GetName()
 }

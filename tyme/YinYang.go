@@ -10,8 +10,8 @@ const (
 	YANG
 )
 
-func (d YinYang) GetCode() int {
-	return int(d)
+func (o YinYang) GetCode() int {
+	return int(o)
 }
 
 func NewYinYang(code int) YinYang {
@@ -23,8 +23,8 @@ func NewYinYang(code int) YinYang {
 	}
 }
 
-func (d YinYang) GetName() string {
-	switch d {
+func (o YinYang) GetName() string {
+	switch o {
 	case YIN:
 		return "阴"
 	default:
@@ -32,6 +32,6 @@ func (d YinYang) GetName() string {
 	}
 }
 
-func (d YinYang) String() string {
-	return d.GetName()
+func (o YinYang) String() string {
+	return o.GetName()
 }

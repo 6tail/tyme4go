@@ -10,8 +10,8 @@ const (
 	MAN
 )
 
-func (d Gender) GetCode() int {
-	return int(d)
+func (o Gender) GetCode() int {
+	return int(o)
 }
 
 func NewGender(code int) Gender {
@@ -23,8 +23,8 @@ func NewGender(code int) Gender {
 	}
 }
 
-func (d Gender) GetName() string {
-	switch d {
+func (o Gender) GetName() string {
+	switch o {
 	case WOMAN:
 		return "女"
 	default:
@@ -32,6 +32,6 @@ func (d Gender) GetName() string {
 	}
 }
 
-func (d Gender) String() string {
-	return d.GetName()
+func (o Gender) String() string {
+	return o.GetName()
 }

@@ -10,33 +10,46 @@ type RabByungYear struct {
 	AbstractTyme
 	// 饶迥(胜生周)序号，从0开始
 	rabByungIndex int
-	// 干支
-	sixtyCycle SixtyCycle
+	// 五行索引，从0开始
+	elementIndex int
+	// 生肖索引，从0开始
+	zodiacIndex int
 }
 
-func NewRabByungYear(rabByungIndex int, sixtyCycle SixtyCycle) (*RabByungYear, error) {
+func (RabByungYear) Validate(year int) error {
+	if year < 1027 || year > 9999 {
+		return fmt.Errorf(fmt.Sprintf("illegal rab-byung year: %d", year))
+	}
+	return nil
+}
+
+func NewRabByungYear(rabByungIndex int, elementIndex int, zodiacIndex int) (*RabByungYear, error) {
 	if rabByungIndex < 0 || rabByungIndex > 150 {
 		return nil, fmt.Errorf("illegal rab-byung index: %d", rabByungIndex)
 	}
-	return &RabByungYear{rabByungIndex: rabByungIndex, sixtyCycle: sixtyCycle}, nil
+	if elementIndex < 0 || elementIndex >= len(ElementNames) {
+		return nil, fmt.Errorf("illegal element index: %d", elementIndex)
+	}
+	if zodiacIndex < 0 || zodiacIndex >= len(ZodiacNames) {
+		return nil, fmt.Errorf("illegal zodiac index: %d", zodiacIndex)
+	}
+	return &RabByungYear{rabByungIndex: rabByungIndex, elementIndex: elementIndex, zodiacIndex: zodiacIndex}, nil
 }
 
 func (RabByungYear) FromSixtyCycle(rabByungIndex int, sixtyCycle SixtyCycle) (*RabByungYear, error) {
-	return NewRabByungYear(rabByungIndex, sixtyCycle)
+	return NewRabByungYear(rabByungIndex, sixtyCycle.GetHeavenStem().GetElement().index, sixtyCycle.GetEarthBranch().GetZodiac().index)
 }
 
 func (RabByungYear) FromElementZodiac(rabByungIndex int, element RabByungElement, zodiac Zodiac) (*RabByungYear, error) {
-	for i := 0; i < 60; i++ {
-		sc := SixtyCycle{}.FromIndex(i)
-		if sc.GetEarthBranch().GetZodiac().Equals(zodiac) && sc.GetHeavenStem().GetElement().GetIndex() == element.GetIndex() {
-			return NewRabByungYear(rabByungIndex, sc)
-		}
-	}
-	return nil, fmt.Errorf("no matching sixty cycle for element %s and zodiac %s", element.GetName(), zodiac.GetName())
+	return NewRabByungYear(rabByungIndex, element.index, zodiac.index)
 }
 
 func (RabByungYear) FromYear(year int) (*RabByungYear, error) {
-	return NewRabByungYear((year-1024)/60, SixtyCycle{}.FromIndex(year-4))
+	err := RabByungYear{}.Validate(year)
+	if err != nil {
+		return nil, err
+	}
+	return RabByungYear{}.FromSixtyCycle((year-1024)/60, SixtyCycle{}.FromIndex(year-4))
 }
 
 func (y RabByungYear) GetRabByungIndex() int {
@@ -44,18 +57,18 @@ func (y RabByungYear) GetRabByungIndex() int {
 }
 
 func (y RabByungYear) GetSixtyCycle() SixtyCycle {
-	return y.sixtyCycle
+	return SixtyCycle{}.FromIndex(6*(y.elementIndex*2+y.zodiacIndex%2) - 5*y.zodiacIndex)
 }
 
 func (y RabByungYear) GetZodiac() Zodiac {
-	return y.sixtyCycle.GetEarthBranch().GetZodiac()
+	return Zodiac{}.FromIndex(y.zodiacIndex)
 }
 
 func (y RabByungYear) GetElement() RabByungElement {
-	return RabByungElement{}.FromIndex(y.sixtyCycle.GetHeavenStem().GetElement().GetIndex())
+	return RabByungElement{}.FromIndex(y.elementIndex)
 }
 
-func (y *RabByungYear) GetName() string {
+func (y RabByungYear) GetName() string {
 	digits := []string{"零", "一", "二", "三", "四", "五", "六", "七", "八", "九"}
 	units := []string{"", "十", "百"}
 	n := y.rabByungIndex + 1
@@ -86,26 +99,25 @@ func (y RabByungYear) Next(n int) (*RabByungYear, error) {
 }
 
 func (y RabByungYear) GetYear() int {
-	return 1024 + y.rabByungIndex*60 + y.sixtyCycle.GetIndex()
+	return 1024 + y.rabByungIndex*60 + y.GetSixtyCycle().GetIndex()
 }
 
 func (y RabByungYear) GetLeapMonth() int {
-	yVal := 1
+	n := 1
 	m := 4
-	t := 0
+	t := 1
 	currentYear := y.GetYear()
-	for yVal < currentYear {
-		i := m - 1
-		if t%2 == 0 {
-			i += 33
-		} else {
-			i += 32
+	for n < currentYear {
+		i := m + 31 + t
+		n += 2
+		m = i - 23
+		if i > 35 {
+			n += 1
+			m -= 12
 		}
-		yVal = (yVal*12 + i) / 12
-		m = i%12 + 1
-		t++
+		t = 1 - t
 	}
-	if yVal == currentYear {
+	if n == currentYear {
 		return m
 	}
 	return 0
@@ -117,7 +129,7 @@ func (y RabByungYear) GetSolarYear() SolarYear {
 }
 
 func (y RabByungYear) GetFirstMonth() RabByungMonth {
-	m, _ := NewRabByungMonth(y, 1)
+	m, _ := NewRabByungMonth(y.GetYear(), 1)
 	return *m
 }
 
@@ -131,17 +143,18 @@ func (y RabByungYear) GetMonthCount() int {
 func (y RabByungYear) GetMonths() []RabByungMonth {
 	var months []RabByungMonth
 	leapMonth := y.GetLeapMonth()
+	year := y.GetYear()
 	for i := 1; i < 13; i++ {
-		m, _ := NewRabByungMonth(y, i)
+		m, _ := NewRabByungMonth(year, i)
 		months = append(months, *m)
 		if i == leapMonth {
-			lm, _ := NewRabByungMonth(y, -i)
-			months = append(months, *lm)
+			m, _ = NewRabByungMonth(year, -i)
+			months = append(months, *m)
 		}
 	}
 	return months
 }
 
-func (o RabByungYear) Equals(target RabByungYear) bool {
-	return o.String() == target.String()
+func (y RabByungYear) Equals(target RabByungYear) bool {
+	return y.String() == target.String()
 }

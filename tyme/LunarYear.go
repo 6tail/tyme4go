@@ -148,10 +148,15 @@ func (o LunarYear) GetFirstMonth() LunarMonth {
 // GetMonths 月份列表，一般有12个月，当年有闰月时，有13个月。
 func (o LunarYear) GetMonths() []LunarMonth {
 	var l []LunarMonth
-	m := o.GetFirstMonth()
-	for i := 0; m.GetYear() == o.year; i++ {
-		l = append(l, m)
-		m = m.Next(1)
+	y := o.GetYear()
+	leapMonth := o.GetLeapMonth()
+	for i := 1; i < 13; i++ {
+		m, _ := LunarMonth{}.FromYm(y, i)
+		l = append(l, *m)
+		if i == leapMonth {
+			m, _ = LunarMonth{}.FromYm(y, -i)
+			l = append(l, *m)
+		}
 	}
 	return l
 }

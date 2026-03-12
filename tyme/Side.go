@@ -10,8 +10,8 @@ const (
 	OUT
 )
 
-func (d Side) GetCode() int {
-	return int(d)
+func (o Side) GetCode() int {
+	return int(o)
 }
 
 func NewSide(code int) Side {
@@ -23,8 +23,8 @@ func NewSide(code int) Side {
 	}
 }
 
-func (d Side) GetName() string {
-	switch d {
+func (o Side) GetName() string {
+	switch o {
 	case IN:
 		return "内"
 	default:
@@ -32,6 +32,6 @@ func (d Side) GetName() string {
 	}
 }
 
-func (d Side) String() string {
-	return d.GetName()
+func (o Side) String() string {
+	return o.GetName()
 }

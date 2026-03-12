@@ -111,7 +111,7 @@ func (o SixtyCycleHour) GetNineStar() NineStar {
 	solar := o.solarTime.GetSolarDay()
 	dongZhi := SolarTerm{}.FromIndex(solar.GetYear(), 0)
 	earthBranchIndex := o.GetIndexInDay() % 12
-	index := []int{8, 5, 2}[o.GetDay().GetEarthBranch().GetIndex()%3]
+	index := 8 - 3*(o.GetDay().GetEarthBranch().GetIndex()%3)
 	if !solar.IsBefore(dongZhi.GetJulianDay().GetSolarDay()) && solar.IsBefore(dongZhi.Next(12).GetJulianDay().GetSolarDay()) {
 		index = 8 + earthBranchIndex - index
 	} else {

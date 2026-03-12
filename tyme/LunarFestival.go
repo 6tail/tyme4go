@@ -135,7 +135,7 @@ func (LunarFestival) FromYmd(year int, month int, day int) (*LunarFestival, erro
 		}
 	}
 
-	if month == 12 && day > 28 {
+	if (month == 12 || month == -12) && day > 28 {
 		re, err = regexp.Compile("@\\d{2}2")
 		if err != nil {
 			return nil, err
@@ -144,8 +144,7 @@ func (LunarFestival) FromYmd(year int, month int, day int) (*LunarFestival, erro
 		if data == "" {
 			return nil, nil
 		}
-		nextDay := lunarDay.Next(1)
-		if nextDay.GetMonth() == 1 && nextDay.GetDay() == 1 {
+		if lunarDay.Next(1).year != year {
 			f, err := LunarFestival{}.New(EVE, *lunarDay, nil, data)
 			if err != nil {
 				return nil, err

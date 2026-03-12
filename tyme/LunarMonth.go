@@ -100,7 +100,7 @@ func (o LunarMonth) GetDayCount() int {
 // GetIndexInYear 位于当年的索引(0-12)
 func (o LunarMonth) GetIndexInYear() int {
 	index := o.month - 1
-	if o.IsLeap() {
+	if o.leap {
 		index += 1
 	} else {
 		leapMonth := o.GetLunarYear().GetLeapMonth()
@@ -212,8 +212,7 @@ func (o LunarMonth) GetWeeks(start int) []LunarWeek {
 
 // GetSixtyCycle 干支
 func (o LunarMonth) GetSixtyCycle() SixtyCycle {
-	t, _ := SixtyCycle{}.FromName(HeavenStem{}.FromIndex(o.GetLunarYear().GetSixtyCycle().GetHeavenStem().GetIndex()*2+o.month+1).GetName() + EarthBranch{}.FromIndex(o.month+1).GetName())
-	return *t
+	return SixtyCycle{}.FromIndex(o.year*12 + o.month - 47)
 }
 
 // GetNineStar 九星
