@@ -42,7 +42,7 @@ func TestLegalHoliday0(t *testing.T) {
 
 func TestLegalHoliday1(t *testing.T) {
 	d, _ := tyme.LegalHoliday{}.FromYmd(2001, 12, 29)
-	excepted := "2001年12月29日 元旦节(班)"
+	excepted := "2001年12月29日 元旦(班)"
 	got := d.String()
 	if excepted != got {
 		t.Errorf("excepted: %v, got: %v", excepted, got)
