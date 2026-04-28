@@ -1,8 +1,7 @@
 package tyme
 
-import (
-	"strings"
-)
+// RabByungElementNames 藏历五行名称
+var RabByungElementNames = []string{"木", "火", "土", "铁", "水"}
 
 // RabByungElement 藏历五行
 type RabByungElement struct {
@@ -10,19 +9,15 @@ type RabByungElement struct {
 }
 
 func (RabByungElement) FromIndex(index int) RabByungElement {
-	return RabByungElement{Element{}.FromIndex(index)}
+	return RabByungElement{Element{LoopTyme{}.FromIndex(RabByungElementNames, index)}}
 }
 
 func (RabByungElement) FromName(name string) (*RabByungElement, error) {
-	p, err := Element{}.FromName(strings.ReplaceAll(name, "铁", "金"))
+	p, err := LoopTyme{}.FromName(RabByungElementNames, name)
 	if err != nil {
 		return nil, err
 	}
-	return &RabByungElement{*p}, nil
-}
-
-func (o RabByungElement) GetName() string {
-	return strings.ReplaceAll(o.Element.GetName(), "金", "铁")
+	return &RabByungElement{Element{*p}}, nil
 }
 
 func (o RabByungElement) Next(n int) RabByungElement {

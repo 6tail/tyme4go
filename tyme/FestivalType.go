@@ -1,6 +1,7 @@
 package tyme
 
 // FestivalType 节日类型
+// Deprecated
 type FestivalType int
 
 const (

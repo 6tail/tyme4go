@@ -27,7 +27,7 @@ func (o LoopTyme) indexOfName(name string) (int, error) {
 			return i, nil
 		}
 	}
-	return -1, fmt.Errorf(fmt.Sprintf("illegal name: %v", name))
+	return -1, fmt.Errorf("illegal name: " + name)
 }
 
 func (o LoopTyme) indexOf(index int) int {

@@ -10,6 +10,8 @@ const (
 	EventManagerRegex = "(@[0-9A-Za-z_]{8})(%s)"
 )
 
+var EventManagerCharsRune = []rune(EventManagerChars)
+
 var EventManagerData = ""
 
 // EventManager 事件管理器

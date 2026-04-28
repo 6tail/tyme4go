@@ -2,11 +2,11 @@ package tyme
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 )
 
-var RabByungMonthNames = []string{"正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"}
 var RabByungMonthAliases = []string{"神变月", "苦行月", "具香月", "萨嘎月", "作净月", "明净月", "具醉月", "具贤月", "天降月", "持众月", "庄严月", "满意月"}
 var RabByungMonthDays = map[int][]int{}
 var onceRabByungMonth sync.Once
@@ -20,7 +20,7 @@ type RabByungMonth struct {
 
 func (RabByungMonth) Validate(year int, month int) error {
 	if month == 0 || month > 12 || month < -12 {
-		return fmt.Errorf("illegal rab-byung month: %d", month)
+		return fmt.Errorf("illegal rab-byung month: " + strconv.Itoa(month))
 	}
 	if year < 1950 || year > 2050 {
 		return fmt.Errorf("rab-byung year %d must between 1950 and 2050", year)
@@ -116,7 +116,7 @@ func (o RabByungMonth) IsLeap() bool {
 }
 
 func (o RabByungMonth) GetName() string {
-	name := RabByungMonthNames[o.month-1]
+	name := LunarMonthNames[o.month-1]
 	if o.leap {
 		return "闰" + name
 	}

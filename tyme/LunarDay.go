@@ -2,6 +2,7 @@ package tyme
 
 import (
 	"fmt"
+	"strconv"
 )
 
 var LunarDayNames = []string{"初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十", "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"}
@@ -13,14 +14,14 @@ type LunarDay struct {
 
 func (LunarDay) Validate(year int, month int, day int) error {
 	if day < 1 {
-		return fmt.Errorf(fmt.Sprintf("illegal lunar day %d", day))
+		return fmt.Errorf("illegal lunar day: " + strconv.Itoa(day))
 	}
 	m, err := LunarMonth{}.FromYm(year, month)
 	if err != nil {
 		return err
 	}
 	if day > m.GetDayCount() {
-		return fmt.Errorf(fmt.Sprintf("illegal day %d in %v", day, m))
+		return fmt.Errorf("illegal day %d in %v", day, m)
 	}
 	return nil
 }
@@ -139,29 +140,7 @@ func (o LunarDay) GetTwelveStar() TwelveStar {
 
 // GetNineStar 九星
 func (o LunarDay) GetNineStar() NineStar {
-	d := o.GetSolarDay()
-	winterSolstice := SolarTerm{}.FromIndex(d.year, 0).GetSolarDay()
-	summerSolstice := SolarTerm{}.FromIndex(d.year, 12).GetSolarDay()
-	nextWinterSolstice := SolarTerm{}.FromIndex(d.year+1, 0).GetSolarDay()
-	// 距冬至最近的甲子日
-	w := winterSolstice.Next(winterSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
-	// 距夏至最近的甲子日
-	s := summerSolstice.Next(summerSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
-	// 距下个冬至最近的甲子日
-	n := nextWinterSolstice.Next(nextWinterSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
-	// 43210012345678876543210012345
-	//      w        s        n
-	//     冬至     夏至      冬至
-	if d.IsBefore(w) {
-		return NineStar{}.FromIndex(w.Subtract(d) - 1)
-	}
-	if d.IsBefore(s) {
-		return NineStar{}.FromIndex(d.Subtract(w))
-	}
-	if d.IsBefore(n) {
-		return NineStar{}.FromIndex(n.Subtract(d) - 1)
-	}
-	return NineStar{}.FromIndex(d.Subtract(n))
+	return o.GetSolarDay().GetNineStar()
 }
 
 // GetJupiterDirection 太岁方位
@@ -222,8 +201,7 @@ func (o LunarDay) GetTwentyEightStar() TwentyEightStar {
 
 // GetFestival 农历传统节日，如果当天不是农历传统节日，返回nil
 func (o LunarDay) GetFestival() *LunarFestival {
-	f, _ := LunarFestival{}.FromYmd(o.year, o.month, o.day)
-	return f
+	return LunarFestival{}.FromYmd(o.year, o.month, o.day)
 }
 
 func (o LunarDay) Equals(target LunarDay) bool {

@@ -1,6 +1,11 @@
 package tyme
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
+
+var WeekUnitNames = []string{"第一周", "第二周", "第三周", "第四周", "第五周", "第六周"}
 
 // WeekUnit 周
 type WeekUnit struct {
@@ -24,10 +29,10 @@ func (o WeekUnit) GetStart() Week {
 
 func (WeekUnit) Validate(_ int, _ int, index int, start int) error {
 	if index < 0 || index > 5 {
-		return fmt.Errorf(fmt.Sprintf("illegal week index: %d", index))
+		return fmt.Errorf("illegal week index: " + strconv.Itoa(index))
 	}
 	if start < 0 || start > 6 {
-		return fmt.Errorf(fmt.Sprintf("illegal week start: %d", start))
+		return fmt.Errorf("illegal week start: " + strconv.Itoa(start))
 	}
 	return nil
 }

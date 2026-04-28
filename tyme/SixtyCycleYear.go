@@ -3,6 +3,7 @@ package tyme
 import (
 	"fmt"
 	"math"
+	"strconv"
 )
 
 // SixtyCycleYear 干支年
@@ -14,7 +15,7 @@ type SixtyCycleYear struct {
 
 func (SixtyCycleYear) FromYear(year int) (*SixtyCycleYear, error) {
 	if year < -1 || year > 9999 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal sixty cycle year: %d", year))
+		return nil, fmt.Errorf("illegal sixty cycle year: " + strconv.Itoa(year))
 	}
 	return &SixtyCycleYear{
 		year: year,

@@ -92,23 +92,7 @@ func (o SixtyCycleDay) GetTwelveStar() TwelveStar {
 
 // GetNineStar 九星
 func (o SixtyCycleDay) GetNineStar() NineStar {
-	d := o.solarDay
-	winterSolstice := SolarTerm{}.FromIndex(d.year, 0).GetSolarDay()
-	summerSolstice := SolarTerm{}.FromIndex(d.year, 12).GetSolarDay()
-	nextWinterSolstice := SolarTerm{}.FromIndex(d.year+1, 0).GetSolarDay()
-	w := winterSolstice.Next(winterSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
-	s := summerSolstice.Next(summerSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
-	n := nextWinterSolstice.Next(nextWinterSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
-	if d.IsBefore(w) {
-		return NineStar{}.FromIndex(w.Subtract(d) - 1)
-	}
-	if d.IsBefore(s) {
-		return NineStar{}.FromIndex(d.Subtract(w))
-	}
-	if d.IsBefore(n) {
-		return NineStar{}.FromIndex(n.Subtract(d) - 1)
-	}
-	return NineStar{}.FromIndex(d.Subtract(n))
+	return o.solarDay.GetNineStar()
 }
 
 // GetJupiterDirection 太岁方位

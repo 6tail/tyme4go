@@ -2,6 +2,7 @@ package tyme
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -18,20 +19,20 @@ type RabByungYear struct {
 
 func (RabByungYear) Validate(year int) error {
 	if year < 1027 || year > 9999 {
-		return fmt.Errorf(fmt.Sprintf("illegal rab-byung year: %d", year))
+		return fmt.Errorf("illegal rab-byung year: " + strconv.Itoa(year))
 	}
 	return nil
 }
 
 func NewRabByungYear(rabByungIndex int, elementIndex int, zodiacIndex int) (*RabByungYear, error) {
 	if rabByungIndex < 0 || rabByungIndex > 150 {
-		return nil, fmt.Errorf("illegal rab-byung index: %d", rabByungIndex)
+		return nil, fmt.Errorf("illegal rab-byung index: " + strconv.Itoa(rabByungIndex))
 	}
 	if elementIndex < 0 || elementIndex >= len(ElementNames) {
-		return nil, fmt.Errorf("illegal element index: %d", elementIndex)
+		return nil, fmt.Errorf("illegal element index: " + strconv.Itoa(elementIndex))
 	}
 	if zodiacIndex < 0 || zodiacIndex >= len(ZodiacNames) {
-		return nil, fmt.Errorf("illegal zodiac index: %d", zodiacIndex)
+		return nil, fmt.Errorf("illegal zodiac index: " + strconv.Itoa(zodiacIndex))
 	}
 	return &RabByungYear{rabByungIndex: rabByungIndex, elementIndex: elementIndex, zodiacIndex: zodiacIndex}, nil
 }

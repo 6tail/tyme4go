@@ -1,6 +1,9 @@
 package tyme
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 // SolarYear 公历年
 type SolarYear struct {
@@ -9,7 +12,7 @@ type SolarYear struct {
 
 func (SolarYear) Validate(year int) error {
 	if year < 1 || year > 9999 {
-		return fmt.Errorf(fmt.Sprintf("illegal solar year: %d", year))
+		return fmt.Errorf("illegal solar year: " + strconv.Itoa(year))
 	}
 	return nil
 }

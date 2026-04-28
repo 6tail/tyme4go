@@ -3,6 +3,7 @@ package tyme
 import (
 	"fmt"
 	"math"
+	"strconv"
 )
 
 var LunarMonthNames = []string{"正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"}
@@ -16,7 +17,7 @@ type LunarMonth struct {
 
 func (LunarMonth) Validate(year int, month int) error {
 	if month == 0 || month > 12 || month < -12 {
-		return fmt.Errorf(fmt.Sprintf("illegal lunar month: %d", month))
+		return fmt.Errorf("illegal lunar month: " + strconv.Itoa(month))
 	}
 	if month < 0 {
 		y, err := LunarYear{}.FromYear(year)
@@ -24,7 +25,7 @@ func (LunarMonth) Validate(year int, month int) error {
 			return err
 		}
 		if -month != y.GetLeapMonth() {
-			return fmt.Errorf(fmt.Sprintf("illegal leap month %d in lunar year %d", -month, year))
+			return fmt.Errorf("illegal leap month %d in lunar year %d", -month, year)
 		}
 	}
 	return nil

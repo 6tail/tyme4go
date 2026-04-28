@@ -2,6 +2,7 @@ package tyme
 
 import (
 	"fmt"
+	"strconv"
 )
 
 var SolarSeasonNames = []string{"一季度", "二季度", "三季度", "四季度"}
@@ -17,7 +18,7 @@ type SolarSeason struct {
 
 func (SolarSeason) FromIndex(year int, index int) (*SolarSeason, error) {
 	if index < 0 || index > 3 {
-		return nil, fmt.Errorf(fmt.Sprintf("illegal solar season index: %d", index))
+		return nil, fmt.Errorf("illegal solar season index: " + strconv.Itoa(index))
 	}
 	y, err := SolarYear{}.FromYear(year)
 	if err != nil {

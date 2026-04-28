@@ -5,6 +5,9 @@ import "fmt"
 // NineStarNames 九星名称
 var NineStarNames = []string{"一", "二", "三", "四", "五", "六", "七", "八", "九"}
 
+// NineStarColors 九星颜色
+var NineStarColors = []string{"白", "黑", "碧", "绿", "黄", "白", "赤", "白", "紫"}
+
 // NineStar 九星
 type NineStar struct {
 	LoopTyme
@@ -28,12 +31,12 @@ func (o NineStar) Next(n int) NineStar {
 
 // GetColor 颜色
 func (o NineStar) GetColor() string {
-	return []string{"白", "黑", "碧", "绿", "黄", "白", "赤", "白", "紫"}[o.index]
+	return NineStarColors[o.index]
 }
 
 // GetElement 五行
 func (o NineStar) GetElement() Element {
-	return Element{}.FromIndex([]int{4, 2, 0, 0, 2, 3, 3, 2, 1}[o.index])
+	return o.GetDirection().GetElement()
 }
 
 // GetDipper 北斗九星

@@ -34,7 +34,7 @@ func (o KitchenGodSteed) byEarthBranch(n int) string {
 
 // GetMouse 几鼠偷粮
 func (o KitchenGodSteed) GetMouse() string {
-	return fmt.Sprintf("%s鼠偷粮", o.byEarthBranch(0))
+	return o.byEarthBranch(0) + "鼠偷粮"
 }
 
 // GetGrass 草子几分
@@ -44,7 +44,7 @@ func (o KitchenGodSteed) GetGrass() string {
 
 // GetCattle 几牛耕田
 func (o KitchenGodSteed) GetCattle() string {
-	return fmt.Sprintf("%s牛耕田", o.byEarthBranch(1))
+	return o.byEarthBranch(1) + "牛耕田"
 }
 
 // GetFlower 花收几分
@@ -54,27 +54,27 @@ func (o KitchenGodSteed) GetFlower() string {
 
 // GetDragon 几龙治水
 func (o KitchenGodSteed) GetDragon() string {
-	return fmt.Sprintf("%s龙治水", o.byEarthBranch(4))
+	return o.byEarthBranch(4) + "龙治水"
 }
 
 // GetHorse 几马驮谷
 func (o KitchenGodSteed) GetHorse() string {
-	return fmt.Sprintf("%s马驮谷", o.byEarthBranch(6))
+	return o.byEarthBranch(6) + "马驮谷"
 }
 
 // GetChicken 几鸡抢米
 func (o KitchenGodSteed) GetChicken() string {
-	return fmt.Sprintf("%s鸡抢米", o.byEarthBranch(9))
+	return o.byEarthBranch(9) + "鸡抢米"
 }
 
 // GetSilkworm 几姑看蚕
 func (o KitchenGodSteed) GetSilkworm() string {
-	return fmt.Sprintf("%s姑看蚕", o.byEarthBranch(9))
+	return o.byEarthBranch(9) + "姑看蚕"
 }
 
 // GetPig 几屠共猪
 func (o KitchenGodSteed) GetPig() string {
-	return fmt.Sprintf("%s屠共猪", o.byEarthBranch(11))
+	return o.byEarthBranch(11) + "屠共猪"
 }
 
 // GetField 甲田几分
@@ -84,12 +84,12 @@ func (o KitchenGodSteed) GetField() string {
 
 // GetCake 几人分饼
 func (o KitchenGodSteed) GetCake() string {
-	return fmt.Sprintf("%s人分饼", o.byHeavenStem(2))
+	return o.byHeavenStem(2) + "人分饼"
 }
 
 // GetGold 几日得金
 func (o KitchenGodSteed) GetGold() string {
-	return fmt.Sprintf("%s日得金", o.byHeavenStem(7))
+	return o.byHeavenStem(7) + "日得金"
 }
 
 // GetPeopleCakes 几人几丙

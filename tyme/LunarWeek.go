@@ -4,8 +4,6 @@ import (
 	"fmt"
 )
 
-var LunarWeekNames = []string{"第一周", "第二周", "第三周", "第四周", "第五周", "第六周"}
-
 // LunarWeek 农历周
 type LunarWeek struct {
 	WeekUnit
@@ -21,7 +19,7 @@ func (LunarWeek) Validate(year int, month int, index int, start int) error {
 		return err
 	}
 	if index >= m.GetWeekCount(start) {
-		return fmt.Errorf(fmt.Sprintf("illegal lunar week index: %d in month: %v", index, m))
+		return fmt.Errorf("illegal lunar week index: %d in month: %v", index, m)
 	}
 	return nil
 }
@@ -52,7 +50,7 @@ func (o LunarWeek) GetLunarMonth() LunarMonth {
 }
 
 func (o LunarWeek) GetName() string {
-	return LunarWeekNames[o.index]
+	return WeekUnitNames[o.index]
 }
 
 func (o LunarWeek) String() string {

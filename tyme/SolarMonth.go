@@ -3,6 +3,7 @@ package tyme
 import (
 	"fmt"
 	"math"
+	"strconv"
 )
 
 var SolarMonthNames = []string{"1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"}
@@ -15,7 +16,7 @@ type SolarMonth struct {
 
 func (SolarMonth) Validate(year int, month int) error {
 	if month < 1 || month > 12 {
-		return fmt.Errorf(fmt.Sprintf("illegal solar month: %d", month))
+		return fmt.Errorf("illegal solar month: " + strconv.Itoa(month))
 	}
 	return SolarYear{}.Validate(year)
 }

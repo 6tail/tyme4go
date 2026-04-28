@@ -19,16 +19,22 @@ func (o EventBuilder) Name(name string) EventBuilder {
 	return o
 }
 
+func (o EventBuilder) getChar(index int) rune {
+	return EventManagerCharsRune[index]
+}
+
+func (o EventBuilder) setValue(index int, n int) EventBuilder {
+	o.data[index] = EventManagerCharsRune[31+n]
+	return o
+}
+
 func (EventBuilder) encodeType(t EventType) rune {
-	return []rune(EventManagerChars)[t.GetCode()]
+	return EventManagerCharsRune[t.GetCode()]
 }
 
 func (o EventBuilder) content(t EventType, a int, b, c int) EventBuilder {
-	o.data[1] = EventBuilder{}.encodeType(t)
-	o.data[2] = []rune(EventManagerChars)[31+a]
-	o.data[3] = []rune(EventManagerChars)[31+b]
-	o.data[4] = []rune(EventManagerChars)[31+c]
-	return o
+	o.data[1] = o.getChar(t.GetCode())
+	return o.setValue(2, a).setValue(3, b).setValue(4, c)
 }
 
 // SolarDay 公历日期
@@ -63,10 +69,10 @@ func (o EventBuilder) TermEarthBranch(termIndex, earthBranchIndex, delayDays int
 
 // StartYear 起始年
 func (o EventBuilder) StartYear(year int) EventBuilder {
-	size := len(EventManagerChars)
+	size := len(EventManagerCharsRune)
 	n := year
 	for i := 0; i < 3; i++ {
-		o.data[8-i] = []rune(EventManagerChars)[n%size]
+		o.data[8-i] = o.getChar(n % size)
 		n /= size
 	}
 	return o
@@ -74,11 +80,10 @@ func (o EventBuilder) StartYear(year int) EventBuilder {
 
 // Offset 偏移天数（最远支持-31至31天）
 func (o EventBuilder) Offset(days int) EventBuilder {
-	o.data[5] = []rune(EventManagerChars)[31+days]
-	return o
+	return o.setValue(5, days)
 }
 
 // Build 生成事件
 func (o EventBuilder) Build() (*Event, error) {
-	return newEvent(o.name, string(o.data))
+	return NewEvent(o.name, string(o.data))
 }

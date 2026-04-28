@@ -1,6 +1,9 @@
 package tyme
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 // SecondUnit 秒
 type SecondUnit struct {
@@ -31,13 +34,13 @@ func (o SecondUnit) GetSecond() int {
 
 func (SecondUnit) Validate(_ int, _ int, _ int, hour int, minute int, second int) error {
 	if hour < 0 || hour > 23 {
-		return fmt.Errorf(fmt.Sprintf("illegal hour: %d", hour))
+		return fmt.Errorf("illegal hour: " + strconv.Itoa(hour))
 	}
 	if minute < 0 || minute > 59 {
-		return fmt.Errorf(fmt.Sprintf("illegal minute: %d", minute))
+		return fmt.Errorf("illegal minute: " + strconv.Itoa(minute))
 	}
 	if second < 0 || second > 59 {
-		return fmt.Errorf(fmt.Sprintf("illegal second: %d", second))
+		return fmt.Errorf("illegal second: " + strconv.Itoa(second))
 	}
 	return nil
 }

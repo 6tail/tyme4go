@@ -2,109 +2,61 @@ package tyme
 
 import (
 	"fmt"
-	"regexp"
-	"strconv"
 )
 
 // SolarFestivalNames 公历现代节日名称
 var SolarFestivalNames = []string{"元旦", "妇女节", "植树节", "劳动节", "青年节", "儿童节", "建党节", "建军节", "教师节", "国庆节"}
 
 // SolarFestivalData 公历现代节日数据
-var SolarFestivalData = "@00001011950@01003081950@02003121979@03005011950@04005041950@05006011950@06007011941@07008011933@08009101985@09010011950"
+var SolarFestivalData = "0VV__0Ux0Xc__0Ux0Xg__0_Q0ZV__0Ux0ZY__0Ux0aV__0Ux0bV__0Uo0cV__0Ug0de__0_V0eV__0Ux"
 
 // SolarFestival 公历现代节日
 type SolarFestival struct {
-	AbstractTyme
-	// 类型
-	festivalType FestivalType
-	// 序号
-	index int
-	// 公历日
-	day SolarDay
-	// 名称
-	name string
-	// 起始年
-	startYear int
+	AbstractFestival
 }
 
-func (SolarFestival) New(festivalType FestivalType, day SolarDay, startYear int, data string) (*SolarFestival, error) {
-	index, err := strconv.Atoi(data[1:3])
-	if err != nil {
-		return nil, err
+func (SolarFestival) New(festivalType FestivalType, index int, event Event, day SolarDay) SolarFestival {
+	return SolarFestival{
+		AbstractFestival{
+			festivalType: festivalType,
+			index:        index,
+			event:        event,
+			day:          day.DayUnit,
+		},
 	}
-	return &SolarFestival{
-		festivalType: festivalType,
-		day:          day,
-		startYear:    startYear,
-		index:        index,
-		name:         SolarFestivalNames[index],
-	}, nil
 }
 
-func (SolarFestival) FromIndex(year int, index int) (*SolarFestival, error) {
+func (SolarFestival) FromIndex(year int, index int) *SolarFestival {
 	if index < 0 || index >= len(SolarFestivalNames) {
-		return nil, nil
+		return nil
 	}
-	re, err := regexp.Compile(fmt.Sprintf("@%02d\\d+", index))
+	start := index * 8
+	e, _ := NewEvent(SolarFestivalNames[index], "@"+SolarFestivalData[start:start+8])
+	if year < e.GetStartYear() {
+		return nil
+	}
+	d, err := SolarDay{}.FromYmd(year, e.GetValue(2), e.GetValue(3))
 	if err != nil {
-		return nil, err
+		return nil
 	}
-	data := re.FindString(SolarFestivalData)
-	if data == "" {
-		return nil, nil
-	}
-	t := NewFestivalType(int([]rune(data[3:4])[0] - '0'))
-	if t != DAY {
-		return nil, nil
-	}
-	startYear, err := strconv.Atoi(data[8:])
-	if err != nil {
-		return nil, err
-	}
-	if year < startYear {
-		return nil, nil
-	}
-	month, err := strconv.Atoi(data[4:6])
-	if err != nil {
-		return nil, err
-	}
-	day, err := strconv.Atoi(data[6:8])
-	if err != nil {
-		return nil, err
-	}
-	d, _ := SolarDay{}.FromYmd(year, month, day)
-	f, err := SolarFestival{}.New(t, *d, startYear, data)
-	if err != nil {
-		return nil, err
-	}
-	return f, nil
+	f := SolarFestival{}.New(DAY, index, *e, *d)
+	return &f
 }
 
-func (SolarFestival) FromYmd(year int, month int, day int) (*SolarFestival, error) {
-	re, err := regexp.Compile(fmt.Sprintf("@\\d{2}0%02d%02d\\d+", month, day))
-	if err != nil {
-		return nil, err
-	}
-	data := re.FindString(SolarFestivalData)
-	if data == "" {
-		return nil, nil
-	}
-	startYear, err := strconv.Atoi(data[8:])
-	if err != nil {
-		return nil, err
-	}
-	if year < startYear {
-		return nil, nil
-	}
+func (SolarFestival) FromYmd(year int, month int, day int) *SolarFestival {
 	d, err := SolarDay{}.FromYmd(year, month, day)
 	if err != nil {
-		return nil, err
+		return nil
 	}
-	f, err := SolarFestival{}.New(DAY, *d, startYear, data)
-	if err != nil {
-		return nil, err
+	for i, name := range SolarFestivalNames {
+		start := i * 8
+		e, _ := NewEvent(name, "@"+SolarFestivalData[start:start+8])
+		if d.year >= e.GetStartYear() && d.month == e.GetValue(2) && d.day == e.GetValue(3) {
+			f := SolarFestival{}.New(DAY, i, *e, *d)
+			return &f
+		}
 	}
-	return f, nil
+	return nil
 }
 
 // GetType 节日类型
@@ -114,30 +66,21 @@ func (o SolarFestival) GetType() FestivalType {
 
 // GetDay 公历日
 func (o SolarFestival) GetDay() SolarDay {
-	return o.day
-}
-
-// GetIndex 索引
-func (o SolarFestival) GetIndex() int {
-	return o.index
-}
-
-func (o SolarFestival) GetName() string {
-	return o.name
+	d, _ := SolarDay{}.FromYmd(o.day.year, o.day.month, o.day.day)
+	return *d
 }
 
 // GetStartYear 起始年
 func (o SolarFestival) GetStartYear() int {
-	return o.startYear
+	return o.event.GetStartYear()
 }
 
 func (o SolarFestival) Next(n int) *SolarFestival {
 	size := len(SolarFestivalNames)
 	i := o.index + n
-	f, _ := SolarFestival{}.FromIndex((o.day.GetYear()*size+i)/size, o.IndexOf(i, size))
-	return f
+	return SolarFestival{}.FromIndex((o.day.GetYear()*size+i)/size, o.IndexOf(i, size))
 }
 
 func (o SolarFestival) String() string {
-	return fmt.Sprintf("%v %v", o.day, o.name)
+	return fmt.Sprintf("%v %v", o.GetDay(), o.GetName())
 }

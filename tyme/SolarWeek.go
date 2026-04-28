@@ -4,8 +4,6 @@ import (
 	"fmt"
 )
 
-var SolarWeekNames = []string{"第一周", "第二周", "第三周", "第四周", "第五周", "第六周"}
-
 // SolarWeek 公历周
 type SolarWeek struct {
 	WeekUnit
@@ -21,7 +19,7 @@ func (SolarWeek) Validate(year int, month int, index int, start int) error {
 		return err
 	}
 	if index >= m.GetWeekCount(start) {
-		return fmt.Errorf(fmt.Sprintf("illegal solar week index: %d in month: %v", index, m))
+		return fmt.Errorf("illegal solar week index: %d in month: %v", index, m)
 	}
 	return nil
 }
@@ -65,7 +63,7 @@ func (o SolarWeek) GetIndexInYear() int {
 }
 
 func (o SolarWeek) GetName() string {
-	return SolarWeekNames[o.index]
+	return WeekUnitNames[o.index]
 }
 
 func (o SolarWeek) String() string {

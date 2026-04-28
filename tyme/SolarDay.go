@@ -15,11 +15,11 @@ type SolarDay struct {
 
 func (SolarDay) Validate(year int, month int, day int) error {
 	if day < 1 {
-		return fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
+		return fmt.Errorf("illegal solar day: %d-%d-%d", year, month, day)
 	}
 	if 1582 == year && 10 == month {
 		if (day > 4 && day < 15) || day > 31 {
-			return fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
+			return fmt.Errorf("illegal solar day: %d-%d-%d", year, month, day)
 		}
 	} else {
 		m, err := SolarMonth{}.FromYm(year, month)
@@ -27,7 +27,7 @@ func (SolarDay) Validate(year int, month int, day int) error {
 			return err
 		}
 		if day > m.GetDayCount() {
-			return fmt.Errorf(fmt.Sprintf("illegal solar day: %d-%d-%d", year, month, day))
+			return fmt.Errorf("illegal solar day: %d-%d-%d", year, month, day)
 		}
 	}
 	return nil
@@ -333,8 +333,7 @@ func (o SolarDay) GetLegalHoliday() *LegalHoliday {
 
 // GetFestival 公历现代节日，如果当天不是公历现代节日，返回nil
 func (o SolarDay) GetFestival() *SolarFestival {
-	f, _ := SolarFestival{}.FromYmd(o.year, o.month, o.day)
-	return f
+	return SolarFestival{}.FromYmd(o.year, o.month, o.day)
 }
 
 // GetPhaseDay 月相第几天
@@ -356,4 +355,30 @@ func (o SolarDay) GetPhase() Phase {
 
 func (o SolarDay) Equals(target SolarDay) bool {
 	return o.String() == target.String()
+}
+
+// GetNineStar 九星
+func (o SolarDay) GetNineStar() NineStar {
+	winterSolstice := SolarTerm{}.FromIndex(o.year, 0).GetSolarDay()
+	summerSolstice := SolarTerm{}.FromIndex(o.year, 12).GetSolarDay()
+	nextWinterSolstice := SolarTerm{}.FromIndex(o.year+1, 0).GetSolarDay()
+	// 距冬至最近的甲子日
+	w := winterSolstice.Next(winterSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
+	// 距夏至最近的甲子日
+	s := summerSolstice.Next(summerSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
+	// 距下个冬至最近的甲子日
+	n := nextWinterSolstice.Next(nextWinterSolstice.GetLunarDay().GetSixtyCycle().StepsCloseTo(0))
+	// 43210012345678876543210012345
+	//      w        s        n
+	//     冬至     夏至      冬至
+	if o.IsBefore(w) {
+		return NineStar{}.FromIndex(w.Subtract(o) - 1)
+	}
+	if o.IsBefore(s) {
+		return NineStar{}.FromIndex(o.Subtract(w))
+	}
+	if o.IsBefore(n) {
+		return NineStar{}.FromIndex(n.Subtract(o) - 1)
+	}
+	return NineStar{}.FromIndex(o.Subtract(n))
 }
