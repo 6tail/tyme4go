@@ -553,33 +553,59 @@ func shuoLow(w float64) float64 {
 	return t*36525 + OneThird
 }
 
-func CalcShuo(jd float64) float64 {
-	size := len(ShuoKb)
+func qiShuo(isQi bool, isHigh bool, jd float64, pc float64) float64 {
+	w := float64(0)
+	if isQi {
+		w = math.Floor((jd+pc-2451259)/365.2422*24) * math.Pi / 12
+	} else {
+		w = math.Floor((jd+pc-2451551)/29.5306) * Pi2
+	}
 	d := float64(0)
-	i := 0
-	pc := float64(14)
-	jd += 2451545
-	f1 := ShuoKb[0] - pc
-	f2 := ShuoKb[size-1] - pc
-	f3 := float64(2436935)
-	if jd < f1 || jd >= f3 {
-		d = math.Floor(shuoHigh(math.Floor((jd+pc-2451551)/29.5306)*Pi2) + 0.5)
-	} else if jd >= f1 && jd < f2 {
+	if isQi {
+		if isHigh {
+			d = qiHigh(w)
+		} else {
+			d = qiLow(w)
+		}
+	} else {
+		if isHigh {
+			d = shuoHigh(w)
+		} else {
+			d = shuoLow(w)
+		}
+	}
+	return math.Floor(d + 0.5)
+}
+
+func calc(isQi bool, jd float64, kb []float64, pc float64, fkb string) float64 {
+	size := len(kb)
+	d := float64(0)
+	j := jd + J2000
+	f1 := kb[0] - pc
+	f2 := kb[size-1] - pc
+	if j < f1 || j >= float64(2436935) {
+		d = qiShuo(isQi, true, j, pc)
+	} else if j >= f1 && j < f2 {
+		i := 0
 		for i = 0; i < size; i += 2 {
-			if jd+pc < ShuoKb[i+2] {
+			if j+pc < kb[i+2] {
 				break
 			}
 		}
-		d = ShuoKb[i] + ShuoKb[i+1]*math.Floor((jd+pc-ShuoKb[i])/ShuoKb[i+1])
-		d = math.Floor(d + 0.5)
-		if d == 1683460 {
-			d++
+		d = math.Floor(kb[i] + kb[i+1]*math.Floor((j+pc-kb[i])/kb[i+1]) + 0.5)
+		if !isQi && d == 1683460 {
+			d += 1
 		}
-		d -= 2451545
-	} else if jd >= f2 && jd < f3 {
-		d = math.Floor(shuoLow(math.Floor((jd+pc-2451551)/29.5306)*Pi2) + 0.5)
-		from := (int)((jd - f2) / 29.5306)
-		n := SB[from : from+1]
+		d -= J2000
+	} else if j >= f2 {
+		d = qiShuo(isQi, false, j, pc)
+		from := 0
+		if isQi {
+			from = (int)((j - f2) / 365.2422 * 24)
+		} else {
+			from = (int)((j - f2) / 29.5306)
+		}
+		n := fkb[from : from+1]
 		if strings.Compare("1", n) == 0 {
 			d += 1
 		} else if strings.Compare("2", n) == 0 {
@@ -589,40 +615,12 @@ func CalcShuo(jd float64) float64 {
 	return d
 }
 
+func CalcShuo(jd float64) float64 {
+	return calc(false, jd, ShuoKb, 14, SB)
+}
+
 func CalcQi(jd float64) float64 {
-	size := len(QiKb)
-	d := float64(0)
-	i := 0
-	pc := float64(7)
-	jd += 2451545
-	f1 := QiKb[0] - pc
-	f2 := QiKb[size-1] - pc
-	f3 := float64(2436935)
-	if jd < f1 || jd >= f3 {
-		d = math.Floor(qiHigh(math.Floor((jd+pc-2451259)/365.2422*24)*math.Pi/12) + 0.5)
-	} else if jd >= f1 && jd < f2 {
-		for i = 0; i < size; i += 2 {
-			if jd+pc < QiKb[i+2] {
-				break
-			}
-		}
-		d = QiKb[i] + QiKb[i+1]*math.Floor((jd+pc-QiKb[i])/QiKb[i+1])
-		d = math.Floor(d + 0.5)
-		if d == 1683460 {
-			d++
-		}
-		d -= 2451545
-	} else if jd >= f2 && jd < f3 {
-		d = math.Floor(qiLow(math.Floor((jd+pc-2451259)/365.2422*24)*math.Pi/12) + 0.5)
-		from := (int)((jd - f2) / 365.2422 * 24)
-		n := QB[from : from+1]
-		if strings.Compare("1", n) == 0 {
-			d += 1
-		} else if strings.Compare("2", n) == 0 {
-			d -= 1
-		}
-	}
-	return d
+	return calc(true, jd, QiKb, 7, QB)
 }
 
 func QiAccurate(w float64) float64 {

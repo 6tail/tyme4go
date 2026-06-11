@@ -15,13 +15,12 @@ type SolarFestival struct {
 	AbstractFestival
 }
 
-func (SolarFestival) New(festivalType FestivalType, index int, event Event, day SolarDay) SolarFestival {
+func (SolarFestival) New(index int, event Event, day SolarDay) SolarFestival {
 	return SolarFestival{
 		AbstractFestival{
-			festivalType: festivalType,
-			index:        index,
-			event:        event,
-			day:          day.DayUnit,
+			index: index,
+			event: event,
+			day:   day.DayUnit,
 		},
 	}
 }
@@ -39,7 +38,7 @@ func (SolarFestival) FromIndex(year int, index int) *SolarFestival {
 	if err != nil {
 		return nil
 	}
-	f := SolarFestival{}.New(DAY, index, *e, *d)
+	f := SolarFestival{}.New(index, *e, *d)
 	return &f
 }
 
@@ -52,16 +51,11 @@ func (SolarFestival) FromYmd(year int, month int, day int) *SolarFestival {
 		start := i * 8
 		e, _ := NewEvent(name, "@"+SolarFestivalData[start:start+8])
 		if d.year >= e.GetStartYear() && d.month == e.GetValue(2) && d.day == e.GetValue(3) {
-			f := SolarFestival{}.New(DAY, i, *e, *d)
+			f := SolarFestival{}.New(i, *e, *d)
 			return &f
 		}
 	}
 	return nil
-}
-
-// GetType 节日类型
-func (o SolarFestival) GetType() FestivalType {
-	return o.festivalType
 }
 
 // GetDay 公历日

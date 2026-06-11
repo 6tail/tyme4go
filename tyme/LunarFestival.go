@@ -13,13 +13,12 @@ type LunarFestival struct {
 	AbstractFestival
 }
 
-func (LunarFestival) New(festivalType FestivalType, index int, event Event, day LunarDay) LunarFestival {
+func (LunarFestival) New(index int, event Event, day LunarDay) LunarFestival {
 	return LunarFestival{
 		AbstractFestival{
-			festivalType: festivalType,
-			index:        index,
-			event:        event,
-			day:          day.DayUnit,
+			index: index,
+			event: event,
+			day:   day.DayUnit,
 		},
 	}
 }
@@ -36,13 +35,13 @@ func (LunarFestival) FromIndex(year int, index int) *LunarFestival {
 		d, _ := LunarDay{}.FromYmd(m[0], m[1], e.GetValue(3))
 		offset := e.GetValue(5)
 		if 0 == offset {
-			f := LunarFestival{}.New(DAY, index, *e, *d)
+			f := LunarFestival{}.New(index, *e, *d)
 			return &f
 		}
-		f := LunarFestival{}.New(DAY, index, *e, d.Next(offset))
+		f := LunarFestival{}.New(index, *e, d.Next(offset))
 		return &f
 	case TERM_DAY:
-		f := LunarFestival{}.New(TERM, index, *e, SolarTerm{}.FromIndex(year, e.GetValue(2)).GetSolarDay().GetLunarDay())
+		f := LunarFestival{}.New(index, *e, SolarTerm{}.FromIndex(year, e.GetValue(2)).GetSolarDay().GetLunarDay())
 		return &f
 	default:
 	}
@@ -62,14 +61,14 @@ func (LunarFestival) FromYmd(year int, month int, day int) *LunarFestival {
 			offset := e.GetValue(5)
 			if 0 == offset {
 				if d.month == e.GetValue(2) && d.day == e.GetValue(3) {
-					f := LunarFestival{}.New(DAY, i, *e, *d)
+					f := LunarFestival{}.New(i, *e, *d)
 					return &f
 				}
 			} else {
 				m := e.GetMonth(d.year)
 				next := d.Next(-offset)
 				if next.year == m[0] && next.month == m[1] && next.day == e.GetValue(3) {
-					f := LunarFestival{}.New(DAY, i, *e, *d)
+					f := LunarFestival{}.New(i, *e, *d)
 					return &f
 				}
 			}
@@ -77,7 +76,7 @@ func (LunarFestival) FromYmd(year int, month int, day int) *LunarFestival {
 		case TERM_DAY:
 			term := d.GetSolarDay().GetTermDay()
 			if term.dayIndex == 0 && term.GetSolarTerm().index == e.GetValue(2)%24 {
-				f := LunarFestival{}.New(TERM, i, *e, *d)
+				f := LunarFestival{}.New(i, *e, *d)
 				return &f
 			}
 			break

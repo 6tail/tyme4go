@@ -59,75 +59,26 @@ func (o SolarTime) Next(n int) SolarTime {
 		t, _ := SolarTime{}.FromYmdHms(o.year, o.month, o.day, o.hour, o.minute, o.second)
 		return *t
 	}
-	ts := o.second + n
-	tm := o.minute + ts/60
-	ts %= 60
-	if ts < 0 {
-		ts += 60
-		tm -= 1
-	}
-	th := o.hour + tm/60
-	tm %= 60
-	if tm < 0 {
-		tm += 60
-		th -= 1
-	}
-	td := th / 24
-	th %= 24
-	if th < 0 {
-		th += 24
-		td -= 1
-	}
-
-	d := o.GetSolarDay().Next(td)
-	t, _ := SolarTime{}.FromYmdHms(d.GetYear(), d.GetMonth(), d.GetDay(), th, tm, ts)
+	ts := o.hour*3600 + o.minute*60 + o.second + n
+	s := o.IndexOf(ts, SecondPerDay)
+	d := o.GetSolarDay().Next(o.FloorDiv(ts, SecondPerDay))
+	t, _ := SolarTime{}.FromYmdHms(d.GetYear(), d.GetMonth(), d.GetDay(), s/3600, (s%3600)/60, s%60)
 	return *t
 }
 
 // IsBefore 是否在指定公历时刻之前
 func (o SolarTime) IsBefore(target SolarTime) bool {
-	aDay := o.GetSolarDay()
-	bDay := target.GetSolarDay()
-	if !aDay.Equals(bDay) {
-		return aDay.IsBefore(bDay)
-	}
-	if o.hour != target.hour {
-		return o.hour < target.hour
-	}
-	if o.minute != target.minute {
-		return o.minute < target.minute
-	}
-	return o.second < target.second
+	return o.GetCompareIndex() < target.GetCompareIndex()
 }
 
 // IsAfter 是否在指定公历时刻之后
 func (o SolarTime) IsAfter(target SolarTime) bool {
-	aDay := o.GetSolarDay()
-	bDay := target.GetSolarDay()
-	if !aDay.Equals(bDay) {
-		return aDay.IsAfter(bDay)
-	}
-	if o.hour != target.hour {
-		return o.hour > target.hour
-	}
-	if o.minute != target.minute {
-		return o.minute > target.minute
-	}
-	return o.second > target.second
+	return o.GetCompareIndex() > target.GetCompareIndex()
 }
 
 // Subtract 公历时刻相减，获得相差秒数
 func (o SolarTime) Subtract(target SolarTime) int {
-	days := o.GetSolarDay().Subtract(target.GetSolarDay())
-	cs := o.hour*3600 + o.minute*60 + o.second
-	ts := target.hour*3600 + target.minute*60 + target.second
-	seconds := cs - ts
-	if seconds < 0 {
-		seconds += 86400
-		days--
-	}
-	seconds += days * 86400
-	return seconds
+	return o.GetSolarDay().Subtract(target.GetSolarDay())*SecondPerDay + o.GetSecondsInDay() - target.GetSecondsInDay()
 }
 
 // GetJulianDay 儒略日

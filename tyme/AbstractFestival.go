@@ -7,8 +7,6 @@ import (
 // AbstractFestival 节日抽象
 type AbstractFestival struct {
 	AbstractTyme
-	// 类型
-	festivalType FestivalType
 	// 序号
 	index int
 	// 日
@@ -17,18 +15,12 @@ type AbstractFestival struct {
 	event Event
 }
 
-func (AbstractFestival) New(festivalType FestivalType, index int, event Event, day DayUnit) AbstractFestival {
+func (AbstractFestival) New(index int, event Event, day DayUnit) AbstractFestival {
 	return AbstractFestival{
-		festivalType: festivalType,
-		index:        index,
-		event:        event,
-		day:          day,
+		index: index,
+		event: event,
+		day:   day,
 	}
-}
-
-// Deprecated:
-func (o AbstractFestival) GetType() FestivalType {
-	return o.festivalType
 }
 
 // GetDay 日

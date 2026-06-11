@@ -69,48 +69,12 @@ func (o LunarDay) Next(n int) LunarDay {
 
 // IsBefore 是否在指定农历日之前
 func (o LunarDay) IsBefore(target LunarDay) bool {
-	aYear := o.year
-	bYear := target.GetYear()
-	if aYear != bYear {
-		return aYear < bYear
-	}
-	aMonth := o.month
-	bMonth := target.GetMonth()
-	if aMonth != bMonth {
-		b := bMonth
-		if b < 0 {
-			b = -b
-		}
-		a := aMonth
-		if a < 0 {
-			a = -a
-		}
-		return aMonth == b || a < b
-	}
-	return o.day < target.GetDay()
+	return o.GetCompareIndex() < target.GetCompareIndex()
 }
 
 // IsAfter 是否在指定农历日之后
 func (o LunarDay) IsAfter(target LunarDay) bool {
-	aYear := o.year
-	bYear := target.GetYear()
-	if aYear != bYear {
-		return aYear > bYear
-	}
-	aMonth := o.month
-	bMonth := target.GetMonth()
-	if aMonth != bMonth {
-		a := aMonth
-		if a < 0 {
-			a = -a
-		}
-		b := bMonth
-		if b < 0 {
-			b = -b
-		}
-		return a == bMonth || a > b
-	}
-	return o.day > target.GetDay()
+	return o.GetCompareIndex() > target.GetCompareIndex()
 }
 
 // Deprecated: Use SixtyCycleDay.GetYear instead.

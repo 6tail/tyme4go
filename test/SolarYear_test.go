@@ -6,7 +6,7 @@ import (
 	"github.com/6tail/tyme4go/tyme"
 )
 
-// TestSolarYear0 公历时刻测试
+// TestSolarYear0 公历年测试
 func TestSolarYear0(t *testing.T) {
 	y, _ := tyme.SolarYear{}.FromYear(2023)
 	excepted := "2023年"

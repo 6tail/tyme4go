@@ -68,55 +68,19 @@ func (o LunarHour) Next(n int) LunarHour {
 		return *t
 	}
 	h := o.hour + n*2
-	diff := 1
-	if h < 0 {
-		diff = -1
-	}
-	hour := h
-	if hour < 0 {
-		hour = -hour
-	}
-	days := hour / 24 * diff
-	hour = (hour % 24) * diff
-	if hour < 0 {
-		hour += 24
-		days--
-	}
-	d := o.GetLunarDay().Next(days)
-	t, _ := LunarHour{}.FromYmdHms(d.GetYear(), d.GetMonth(), d.GetDay(), hour, o.minute, o.second)
+	d := o.GetLunarDay().Next(o.FloorDiv(h, 24))
+	t, _ := LunarHour{}.FromYmdHms(d.GetYear(), d.GetMonth(), d.GetDay(), o.IndexOf(h, 24), o.minute, o.second)
 	return *t
 }
 
 // IsBefore 是否在指定农历时辰之前
 func (o LunarHour) IsBefore(target LunarHour) bool {
-	aDay := o.GetLunarDay()
-	bDay := target.GetLunarDay()
-	if !aDay.Equals(bDay) {
-		return aDay.IsBefore(bDay)
-	}
-	if o.hour != target.GetHour() {
-		return o.hour < target.GetHour()
-	}
-	if o.minute != target.GetMinute() {
-		return o.minute < target.GetMinute()
-	}
-	return o.second < target.GetSecond()
+	return o.GetCompareIndex() < target.GetCompareIndex()
 }
 
 // IsAfter 是否在指定农历时辰之后
 func (o LunarHour) IsAfter(target LunarHour) bool {
-	aDay := o.GetLunarDay()
-	bDay := target.GetLunarDay()
-	if !aDay.Equals(bDay) {
-		return aDay.IsAfter(bDay)
-	}
-	if o.hour != target.GetHour() {
-		return o.hour > target.GetHour()
-	}
-	if o.minute != target.GetMinute() {
-		return o.minute > target.GetMinute()
-	}
-	return o.second > target.GetSecond()
+	return o.GetCompareIndex() > target.GetCompareIndex()
 }
 
 // Deprecated: Use GetSixtyCycleHour.GetYear instead.

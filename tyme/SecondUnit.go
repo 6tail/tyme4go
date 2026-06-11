@@ -44,3 +44,13 @@ func (SecondUnit) Validate(_ int, _ int, _ int, hour int, minute int, second int
 	}
 	return nil
 }
+
+// GetSecondsInDay 当天秒数
+func (o SecondUnit) GetSecondsInDay() int {
+	return o.hour*3600 + o.minute*60 + o.second
+}
+
+// GetCompareIndex 用于比较大小的索引
+func (o SecondUnit) GetCompareIndex() int {
+	return o.DayUnit.GetCompareIndex()*SecondPerDay + o.GetSecondsInDay()
+}

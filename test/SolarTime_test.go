@@ -20,4 +20,10 @@ func TestSolarTime0(t *testing.T) {
 	if excepted != got {
 		t.Errorf("excepted: %v, got: %v", excepted, got)
 	}
+
+	excepted = "13:03:59"
+	got = time.Next(-81).GetName()
+	if excepted != got {
+		t.Errorf("excepted: %v, got: %v", excepted, got)
+	}
 }

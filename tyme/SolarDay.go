@@ -14,21 +14,20 @@ type SolarDay struct {
 }
 
 func (SolarDay) Validate(year int, month int, day int) error {
-	if day < 1 {
-		return fmt.Errorf("illegal solar day: %d-%d-%d", year, month, day)
+	illegal := day < 1
+	if !illegal {
+		if 1582 == year && 10 == month {
+			illegal = (day > 4 && day < 15) || day > 31
+		} else {
+			m, err := SolarMonth{}.FromYm(year, month)
+			if err != nil {
+				return err
+			}
+			illegal = day > m.GetDayCount()
+		}
 	}
-	if 1582 == year && 10 == month {
-		if (day > 4 && day < 15) || day > 31 {
-			return fmt.Errorf("illegal solar day: %d-%d-%d", year, month, day)
-		}
-	} else {
-		m, err := SolarMonth{}.FromYm(year, month)
-		if err != nil {
-			return err
-		}
-		if day > m.GetDayCount() {
-			return fmt.Errorf("illegal solar day: %d-%d-%d", year, month, day)
-		}
+	if illegal {
+		return fmt.Errorf("illegal solar day: %d-%d-%d", year, month, day)
 	}
 	return nil
 }
@@ -64,32 +63,13 @@ func (o SolarDay) GetWeek() Week {
 
 // GetConstellation 星座
 func (o SolarDay) GetConstellation() Constellation {
-	index := 8
-	y := o.GetMonth()*100 + o.day
-	if y > 1221 || y < 120 {
-		index = 9
-	} else if y < 219 {
-		index = 10
-	} else if y < 321 {
-		index = 11
-	} else if y < 420 {
-		index = 0
-	} else if y < 521 {
-		index = 1
-	} else if y < 622 {
-		index = 2
-	} else if y < 723 {
-		index = 3
-	} else if y < 823 {
-		index = 4
-	} else if y < 923 {
-		index = 5
-	} else if y < 1024 {
-		index = 6
-	} else if y < 1123 {
-		index = 7
+	days := []int{19, 18, 20, 19, 20, 21, 22, 22, 22, 23, 22, 21}
+	m := o.month - 1
+	offset := 0
+	if o.day > days[m] {
+		offset = 1
 	}
-	return Constellation{}.FromIndex(index)
+	return Constellation{}.FromIndex(9 + m + offset)
 }
 
 func (o SolarDay) GetName() string {
@@ -106,24 +86,12 @@ func (o SolarDay) Next(n int) SolarDay {
 
 // IsBefore 是否在指定公历日之前
 func (o SolarDay) IsBefore(target SolarDay) bool {
-	if o.year != target.year {
-		return o.year < target.year
-	}
-	if o.month != target.month {
-		return o.month < target.month
-	}
-	return o.day < target.day
+	return o.GetCompareIndex() < target.GetCompareIndex()
 }
 
 // IsAfter 是否在指定公历日之后
 func (o SolarDay) IsAfter(target SolarDay) bool {
-	if o.year != target.year {
-		return o.year > target.year
-	}
-	if o.month != target.month {
-		return o.month > target.month
-	}
-	return o.day > target.day
+	return o.GetCompareIndex() > target.GetCompareIndex()
 }
 
 // GetTerm 节气
@@ -381,4 +349,18 @@ func (o SolarDay) GetNineStar() NineStar {
 		return NineStar{}.FromIndex(n.Subtract(o) - 1)
 	}
 	return NineStar{}.FromIndex(o.Subtract(n))
+}
+
+// GetHijriDay 回历日
+func (o SolarDay) GetHijriDay() HijriDay {
+	sd, _ := SolarDay{}.FromYmd(622, 7, 16)
+	d := o.Subtract(*sd)
+	z := o.FloorDiv(d, 10631)
+	d -= z * 10631
+	y := int(math.Floor((float64(d) + 0.5) / 354.366))
+	d -= int(math.Floor(float64(y)*354.366 + 0.5))
+	m := int(math.Floor((float64(d) + 0.11) / 29.51))
+	d -= int(math.Floor(float64(m)*29.5 + 0.5))
+	h, _ := HijriDay{}.FromYmd(z*30+y+1, m+1, d+1)
+	return *h
 }

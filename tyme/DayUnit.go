@@ -12,3 +12,8 @@ type DayUnit struct {
 func (o DayUnit) GetDay() int {
 	return o.day
 }
+
+// GetCompareIndex 用于比较大小的索引
+func (o DayUnit) GetCompareIndex() int {
+	return o.MonthUnit.GetCompareIndex() + o.day
+}

@@ -14,6 +14,15 @@ func (o AbstractCulture) IndexOf(index int, size int) int {
 	return i
 }
 
+// FloorDiv 向下取整的除法（向负无穷取整）
+func (o AbstractCulture) FloorDiv(x int, y int) int {
+	r := x / y
+	if (x^y) < 0 && (r*y != x) {
+		r--
+	}
+	return r
+}
+
 func (o AbstractCulture) GetName() string {
 	return ""
 }
