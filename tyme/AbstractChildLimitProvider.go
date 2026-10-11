@@ -6,27 +6,25 @@ type AbstractChildLimitProvider struct {
 }
 
 func (o AbstractChildLimitProvider) next(birthTime SolarTime, addYear int, addMonth int, addDay int, addHour int, addMinute int, addSecond int) ChildLimitInfo {
-	d := birthTime.GetDay() + addDay
-	h := birthTime.GetHour() + addHour
-	mi := birthTime.GetMinute() + addMinute
-	s := birthTime.GetSecond() + addSecond
-	mi += s / 60
-	s %= 60
-	h += mi / 60
-	mi %= 60
-	d += h / 24
-	h %= 24
-
-	mt, _ := SolarMonth{}.FromYm(birthTime.GetYear()+addYear, birthTime.GetMonth())
+	mt, err := SolarMonth{}.FromYm(birthTime.GetYear()+addYear, birthTime.GetMonth())
+	if err != nil {
+		panic(err)
+	}
 	sm := mt.Next(addMonth)
 
-	dc := sm.GetDayCount()
-	for d > dc {
-		d -= dc
-		sm = sm.Next(1)
-		dc = sm.GetDayCount()
+	// 年月平移后保留合法日号，避免把1582年10月15日当作当月第15天。
+	t, err := SolarTime{}.FromYmdHms(sm.GetYear(), sm.GetMonth(), birthTime.GetDay(), birthTime.GetHour(), birthTime.GetMinute(), birthTime.GetSecond())
+	dayOffset := 0
+	if err != nil {
+		// 日号不存在时从月初顺延，保留月末溢出，并跳过公历缺日。
+		t, err = SolarTime{}.FromYmdHms(sm.GetYear(), sm.GetMonth(), 1, birthTime.GetHour(), birthTime.GetMinute(), birthTime.GetSecond())
+		if err != nil {
+			panic(err)
+		}
+		dayOffset = birthTime.GetDay() - 1
 	}
 
-	t, _ := SolarTime{}.FromYmdHms(sm.GetYear(), sm.GetMonth(), d, h, mi, s)
-	return ChildLimitInfo{}.New(birthTime, *t, addYear, addMonth, addDay, addHour, addMinute)
+	// 日时分秒按实际经过时间推进，由历法层处理1582年的公历跳日。
+	endTime := t.Next((dayOffset+addDay)*SecondPerDay + addHour*3600 + addMinute*60 + addSecond)
+	return ChildLimitInfo{}.New(birthTime, endTime, addYear, addMonth, addDay, addHour, addMinute)
 }
