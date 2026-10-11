@@ -13,7 +13,7 @@ type RabByungDay struct {
 
 func (RabByungDay) Validate(year int, month int, day int) error {
 	if day == 0 || day < -30 || day > 30 {
-		return fmt.Errorf("illegal day %d in %s", day, month)
+		return fmt.Errorf("illegal day %d in %d", day, month)
 	}
 	m, err := RabByungMonth{}.FromYm(year, month)
 	if err != nil {
